@@ -3,8 +3,6 @@ package com.orderflow.controller;
 import com.orderflow.dao.CategoryDAO;
 import com.orderflow.model.Category;
 import com.orderflow.util.AlertUtil;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -13,7 +11,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 
-public class CategoryController {
+public class CategoryController extends AbstractCrudController<Category> {
 
     @FXML private TableView<Category> categoryTable;
     @FXML private TableColumn<Category, Integer> idColumn;
@@ -30,14 +28,27 @@ public class CategoryController {
 
         categoryTable.setItems(categoryList);
         categoryTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) nameField.setText(newVal.getName());
+            if (newVal != null) select(newVal);
         });
 
         refresh();
     }
 
-    private void refresh() {
+    @Override
+    protected void refresh() {
         categoryList.setAll(categoryDAO.findAll());
+    }
+
+    @Override
+    protected void populateForm(Category c) {
+        nameField.setText(c.getName());
+    }
+
+    @Override
+    protected void clearForm() {
+        selectedItem = null;
+        nameField.clear();
+        categoryTable.getSelectionModel().clearSelection();
     }
 
     @FXML
@@ -48,7 +59,7 @@ public class CategoryController {
             return;
         }
         if (categoryDAO.add(name)) {
-            nameField.clear();
+            clearForm();
             refresh();
         } else {
             AlertUtil.error("Error", "Could not add category (it may already exist).");
@@ -57,9 +68,8 @@ public class CategoryController {
 
     @FXML
     private void handleUpdate() {
-        Category selected = categoryTable.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            AlertUtil.warn("No selection", "Select a category to update first.");
+        if (!hasSelection()) {
+            requireSelection();
             return;
         }
         String name = nameField.getText().trim();
@@ -67,19 +77,18 @@ public class CategoryController {
             AlertUtil.warn("Validation", "Please enter a category name.");
             return;
         }
-        categoryDAO.update(selected.getId(), name);
+        categoryDAO.update(selectedItem.getId(), name);
         refresh();
     }
 
     @FXML
     private void handleDelete() {
-        Category selected = categoryTable.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            AlertUtil.warn("No selection", "Select a category to delete first.");
+        if (!hasSelection()) {
+            requireSelection();
             return;
         }
-        if (AlertUtil.confirm("Confirm delete", "Delete category '" + selected.getName() + "'?")) {
-            if (!categoryDAO.delete(selected.getId())) {
+        if (confirmDelete(selectedItem.getName())) {
+            if (!categoryDAO.delete(selectedItem.getId())) {
                 AlertUtil.error("Error", "Could not delete this category. It may still be used by existing products.");
             }
             refresh();

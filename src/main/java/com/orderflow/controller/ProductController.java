@@ -11,7 +11,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 
-public class ProductController {
+public class ProductController extends AbstractCrudController<Product> {
 
     @FXML private TextField nameField;
     @FXML private TextField skuField;
@@ -37,8 +37,6 @@ public class ProductController {
     private final CategoryDAO categoryDAO = new CategoryDAO();
     private final ObservableList<Product> productList = FXCollections.observableArrayList();
 
-    private Product selectedProduct;
-
     @FXML
     public void initialize() {
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -60,18 +58,19 @@ public class ProductController {
 
         productTable.setItems(productList);
         productTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) populateForm(newVal);
+            if (newVal != null) select(newVal);
         });
 
         refresh();
     }
 
-    private void refresh() {
+    @Override
+    protected void refresh() {
         productList.setAll(productDAO.findAll());
     }
 
-    private void populateForm(Product p) {
-        selectedProduct = p;
+    @Override
+    protected void populateForm(Product p) {
         nameField.setText(p.getName());
         skuField.setText(p.getSku());
         purchasePriceField.setText(String.valueOf(p.getPurchasePrice()));
@@ -86,55 +85,9 @@ public class ProductController {
         }
     }
 
-    @FXML
-    private void handleAdd() {
-        Product p = buildProductFromForm(null);
-        if (p == null) return;
-
-        if (productDAO.add(p)) {
-            AlertUtil.info("Success", "Product added successfully.");
-            handleClear();
-            refresh();
-        } else {
-            AlertUtil.error("Error", "Could not add product. Check that the SKU is unique.");
-        }
-    }
-
-    @FXML
-    private void handleUpdate() {
-        if (selectedProduct == null) {
-            AlertUtil.warn("No selection", "Select a product from the table first.");
-            return;
-        }
-        Product p = buildProductFromForm(selectedProduct.getId());
-        if (p == null) return;
-        p.setActive(selectedProduct.isActive());
-
-        if (productDAO.update(p)) {
-            AlertUtil.info("Success", "Product updated successfully.");
-            handleClear();
-            refresh();
-        } else {
-            AlertUtil.error("Error", "Could not update product.");
-        }
-    }
-
-    @FXML
-    private void handleDeactivate() {
-        if (selectedProduct == null) {
-            AlertUtil.warn("No selection", "Select a product from the table first.");
-            return;
-        }
-        if (AlertUtil.confirm("Confirm", "Deactivate '" + selectedProduct.getName() + "'? It will no longer appear for new orders.")) {
-            productDAO.deactivate(selectedProduct.getId());
-            handleClear();
-            refresh();
-        }
-    }
-
-    @FXML
-    private void handleClear() {
-        selectedProduct = null;
+    @Override
+    protected void clearForm() {
+        selectedItem = null;
         nameField.clear();
         skuField.clear();
         purchasePriceField.clear();
@@ -143,6 +96,57 @@ public class ProductController {
         minStockField.clear();
         categoryCombo.getSelectionModel().clearSelection();
         productTable.getSelectionModel().clearSelection();
+    }
+
+    @FXML
+    private void handleAdd() {
+        Product p = buildProductFromForm(null);
+        if (p == null) return;
+
+        if (productDAO.add(p)) {
+            AlertUtil.info("Success", "Product added successfully.");
+            clearForm();
+            refresh();
+        } else {
+            AlertUtil.error("Error", "Could not add product. Check that the SKU is unique.");
+        }
+    }
+
+    @FXML
+    private void handleUpdate() {
+        if (!hasSelection()) {
+            requireSelection();
+            return;
+        }
+        Product p = buildProductFromForm(selectedItem.getId());
+        if (p == null) return;
+        p.setActive(selectedItem.isActive());
+
+        if (productDAO.update(p)) {
+            AlertUtil.info("Success", "Product updated successfully.");
+            clearForm();
+            refresh();
+        } else {
+            AlertUtil.error("Error", "Could not update product.");
+        }
+    }
+
+    @FXML
+    private void handleDeactivate() {
+        if (!hasSelection()) {
+            requireSelection();
+            return;
+        }
+        if (AlertUtil.confirm("Confirm", "Deactivate '" + selectedItem.getName() + "'? It will no longer appear for new orders.")) {
+            productDAO.deactivate(selectedItem.getId());
+            clearForm();
+            refresh();
+        }
+    }
+
+    @FXML
+    private void handleClear() {
+        clearForm();
     }
 
     @FXML

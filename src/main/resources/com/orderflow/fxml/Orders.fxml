@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.orderflow.controller.OrderController" spacing="15">
+
+    <Label text="Order Management" styleClass="section-title"/>
+
+    <HBox spacing="10">
+        <Button text="+ New Order" styleClass="button-primary" onAction="#handleNewOrder"/>
+        <Button text="View Invoice" styleClass="button-secondary" onAction="#handleViewInvoice"/>
+        <Button text="Advance Status" styleClass="button-secondary" onAction="#handleAdvanceStatus"/>
+        <Button text="Mark COD Collected" styleClass="button-secondary" onAction="#handleMarkPaid"/>
+        <Button text="Refresh" styleClass="button-secondary" onAction="#handleRefresh"/>
+    </HBox>
+
+    <TableView fx:id="orderTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="idColumn" text="Order #" prefWidth="70"/>
+            <TableColumn fx:id="customerColumn" text="Customer" prefWidth="150"/>
+            <TableColumn fx:id="dateColumn" text="Date" prefWidth="150"/>
+            <TableColumn fx:id="totalColumn" text="Total (Tk)" prefWidth="90"/>
+            <TableColumn fx:id="paymentMethodColumn" text="Payment Method" prefWidth="120"/>
+            <TableColumn fx:id="paymentStatusColumn" text="Payment Status" prefWidth="110"/>
+            <TableColumn fx:id="orderStatusColumn" text="Order Status" prefWidth="120"/>
+        </columns>
+    </TableView>
+
+</VBox>
