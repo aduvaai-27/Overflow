@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.orderflow.controller.DashboardController" spacing="20">
+
+    <Label text="Business Overview" styleClass="section-title"/>
+
+    <HBox spacing="15">
+        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4">
+            <Label text="Total Products" styleClass="stat-card-label"/>
+            <Label fx:id="totalProductsLabel" text="0" styleClass="stat-card-value"/>
+        </VBox>
+        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4">
+            <Label text="Total Customers" styleClass="stat-card-label"/>
+            <Label fx:id="totalCustomersLabel" text="0" styleClass="stat-card-value"/>
+        </VBox>
+        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4">
+            <Label text="Total Orders" styleClass="stat-card-label"/>
+            <Label fx:id="totalOrdersLabel" text="0" styleClass="stat-card-value"/>
+        </VBox>
+        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4">
+            <Label text="Total Revenue (Tk)" styleClass="stat-card-label"/>
+            <Label fx:id="totalRevenueLabel" text="0" styleClass="stat-card-value"/>
+        </VBox>
+    </HBox>
+
+    <HBox spacing="15">
+        <VBox styleClass="stat-card, stat-card-alert" alignment="CENTER_LEFT" spacing="4">
+            <Label text="Low Stock Alerts" styleClass="stat-card-label"/>
+            <Label fx:id="lowStockLabel" text="0" styleClass="stat-card-value"/>
+        </VBox>
+        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4">
+            <Label text="Pending COD Orders" styleClass="stat-card-label"/>
+            <Label fx:id="pendingCodLabel" text="0" styleClass="stat-card-value"/>
+        </VBox>
+    </HBox>
+
+</VBox>
