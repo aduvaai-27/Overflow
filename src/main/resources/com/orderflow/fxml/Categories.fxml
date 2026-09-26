@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.orderflow.controller.CategoryController" spacing="15">
+
+    <Label text="Category Management" styleClass="section-title"/>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <TextField fx:id="nameField" promptText="Category name" prefWidth="250"/>
+        <Button text="Add" styleClass="button-primary" onAction="#handleAdd"/>
+        <Button text="Update Selected" styleClass="button-secondary" onAction="#handleUpdate"/>
+        <Button text="Delete Selected" styleClass="button-danger" onAction="#handleDelete"/>
+    </HBox>
+
+    <TableView fx:id="categoryTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="idColumn" text="ID" prefWidth="60"/>
+            <TableColumn fx:id="nameColumn" text="Category Name" prefWidth="300"/>
+        </columns>
+    </TableView>
+
+</VBox>
