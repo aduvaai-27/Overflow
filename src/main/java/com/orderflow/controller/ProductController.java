@@ -5,13 +5,14 @@ import com.orderflow.dao.ProductDAO;
 import com.orderflow.model.Category;
 import com.orderflow.model.Product;
 import com.orderflow.util.AlertUtil;
+import com.orderflow.util.TableColorUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 
-public class ProductController extends AbstractCrudController<Product> {
+public class ProductController {
 
     @FXML private TextField nameField;
     @FXML private TextField skuField;
@@ -37,6 +38,8 @@ public class ProductController extends AbstractCrudController<Product> {
     private final CategoryDAO categoryDAO = new CategoryDAO();
     private final ObservableList<Product> productList = FXCollections.observableArrayList();
 
+    private Product selectedProduct;
+
     @FXML
     public void initialize() {
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -53,24 +56,28 @@ public class ProductController extends AbstractCrudController<Product> {
             String text = !p.isActive() ? "Inactive" : (p.isLowStock() ? "LOW STOCK" : "OK");
             return new javafx.beans.property.SimpleStringProperty(text);
         });
+        TableColorUtil.colorizeText(statusColumn, value -> switch (value) {
+            case "OK" -> "#2ecc71";
+            case "LOW STOCK" -> "#e74c3c";
+            default -> "#95a5a6";
+        });
 
         categoryCombo.setItems(FXCollections.observableArrayList(categoryDAO.findAll()));
 
         productTable.setItems(productList);
         productTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) select(newVal);
+            if (newVal != null) populateForm(newVal);
         });
 
         refresh();
     }
 
-    @Override
-    protected void refresh() {
+    private void refresh() {
         productList.setAll(productDAO.findAll());
     }
 
-    @Override
-    protected void populateForm(Product p) {
+    private void populateForm(Product p) {
+        selectedProduct = p;
         nameField.setText(p.getName());
         skuField.setText(p.getSku());
         purchasePriceField.setText(String.valueOf(p.getPurchasePrice()));
@@ -85,19 +92,6 @@ public class ProductController extends AbstractCrudController<Product> {
         }
     }
 
-    @Override
-    protected void clearForm() {
-        selectedItem = null;
-        nameField.clear();
-        skuField.clear();
-        purchasePriceField.clear();
-        sellingPriceField.clear();
-        stockQtyField.clear();
-        minStockField.clear();
-        categoryCombo.getSelectionModel().clearSelection();
-        productTable.getSelectionModel().clearSelection();
-    }
-
     @FXML
     private void handleAdd() {
         Product p = buildProductFromForm(null);
@@ -105,7 +99,7 @@ public class ProductController extends AbstractCrudController<Product> {
 
         if (productDAO.add(p)) {
             AlertUtil.info("Success", "Product added successfully.");
-            clearForm();
+            handleClear();
             refresh();
         } else {
             AlertUtil.error("Error", "Could not add product. Check that the SKU is unique.");
@@ -114,17 +108,17 @@ public class ProductController extends AbstractCrudController<Product> {
 
     @FXML
     private void handleUpdate() {
-        if (!hasSelection()) {
-            requireSelection();
+        if (selectedProduct == null) {
+            AlertUtil.warn("No selection", "Select a product from the table first.");
             return;
         }
-        Product p = buildProductFromForm(selectedItem.getId());
+        Product p = buildProductFromForm(selectedProduct.getId());
         if (p == null) return;
-        p.setActive(selectedItem.isActive());
+        p.setActive(selectedProduct.isActive());
 
         if (productDAO.update(p)) {
             AlertUtil.info("Success", "Product updated successfully.");
-            clearForm();
+            handleClear();
             refresh();
         } else {
             AlertUtil.error("Error", "Could not update product.");
@@ -133,20 +127,28 @@ public class ProductController extends AbstractCrudController<Product> {
 
     @FXML
     private void handleDeactivate() {
-        if (!hasSelection()) {
-            requireSelection();
+        if (selectedProduct == null) {
+            AlertUtil.warn("No selection", "Select a product from the table first.");
             return;
         }
-        if (AlertUtil.confirm("Confirm", "Deactivate '" + selectedItem.getName() + "'? It will no longer appear for new orders.")) {
-            productDAO.deactivate(selectedItem.getId());
-            clearForm();
+        if (AlertUtil.confirm("Confirm", "Deactivate '" + selectedProduct.getName() + "'? It will no longer appear for new orders.")) {
+            productDAO.deactivate(selectedProduct.getId());
+            handleClear();
             refresh();
         }
     }
 
     @FXML
     private void handleClear() {
-        clearForm();
+        selectedProduct = null;
+        nameField.clear();
+        skuField.clear();
+        purchasePriceField.clear();
+        sellingPriceField.clear();
+        stockQtyField.clear();
+        minStockField.clear();
+        categoryCombo.getSelectionModel().clearSelection();
+        productTable.getSelectionModel().clearSelection();
     }
 
     @FXML

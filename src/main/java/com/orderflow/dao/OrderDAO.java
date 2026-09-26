@@ -11,7 +11,9 @@ import java.util.List;
 
 public class OrderDAO {
 
-    private final ProductDAO productDAO = new ProductDAO();
+    private final CapitalDAO capitalDAO = new CapitalDAO();
+
+    private static final List<String> CANCELLABLE_STATUSES = List.of("Pending", "Confirmed");
 
     public List<Order> findAll() {
         List<Order> list = new ArrayList<>();
@@ -34,6 +36,22 @@ public class OrderDAO {
         try (PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement(sql)) {
             ps.setString(1, fromDate);
             ps.setString(2, toDate);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(map(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<Order> findByCustomerId(int customerId) {
+        List<Order> list = new ArrayList<>();
+        String sql = "SELECT o.*, c.name AS customer_name FROM orders o " +
+                     "JOIN customers c ON o.customer_id = c.id " +
+                     "WHERE o.customer_id = ? ORDER BY o.id DESC";
+        try (PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement(sql)) {
+            ps.setInt(1, customerId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) list.add(map(rs));
             }
@@ -99,10 +117,14 @@ public class OrderDAO {
             String insertItem = "INSERT INTO order_items(order_id, product_id, quantity, unit_price, line_total) VALUES (?,?,?,?,?)";
             String reduceStock = "UPDATE products SET stock_qty = stock_qty - ? WHERE id = ? AND stock_qty >= ?";
             String logTxn = "INSERT INTO inventory_transactions(product_id, change_qty, reason, transaction_date) VALUES (?,?,?,?)";
+            String getCost = "SELECT purchase_price FROM products WHERE id = ?";
+
+            double totalProfit = 0;
 
             try (PreparedStatement psItem = conn.prepareStatement(insertItem);
                  PreparedStatement psStock = conn.prepareStatement(reduceStock);
-                 PreparedStatement psTxn = conn.prepareStatement(logTxn)) {
+                 PreparedStatement psTxn = conn.prepareStatement(logTxn);
+                 PreparedStatement psCost = conn.prepareStatement(getCost)) {
 
                 for (OrderItem item : items) {
                     psItem.setInt(1, orderId);
@@ -118,7 +140,6 @@ public class OrderDAO {
                     int rowsUpdated = psStock.executeUpdate();
 
                     if (rowsUpdated == 0) {
-
                         conn.rollback();
                         return -1;
                     }
@@ -128,7 +149,19 @@ public class OrderDAO {
                     psTxn.setString(3, "Order #" + orderId);
                     psTxn.setString(4, LocalDateTime.now().toString());
                     psTxn.executeUpdate();
+
+                    psCost.setInt(1, item.getProductId());
+                    try (ResultSet costRs = psCost.executeQuery()) {
+                        if (costRs.next()) {
+                            double purchasePrice = costRs.getDouble("purchase_price");
+                            totalProfit += item.getLineTotal() - (purchasePrice * item.getQuantity());
+                        }
+                    }
                 }
+            }
+
+            if ("Paid".equals(order.getPaymentStatus())) {
+                capitalDAO.addEntry(conn, totalProfit, "Sales Profit", "Profit from Order #" + orderId);
             }
 
             conn.commit();
@@ -156,14 +189,150 @@ public class OrderDAO {
     }
 
     public boolean markPaymentPaid(int orderId) {
-        String sql = "UPDATE orders SET payment_status = 'Paid' WHERE id = ?";
-        try (PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement(sql)) {
-            ps.setInt(1, orderId);
-            return ps.executeUpdate() > 0;
+        Connection conn = DatabaseConnection.getConnection();
+        try {
+            conn.setAutoCommit(false);
+
+            String currentStatus = null;
+            String currentPayment = null;
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "SELECT order_status, payment_status FROM orders WHERE id = ?")) {
+                ps.setInt(1, orderId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        currentStatus = rs.getString("order_status");
+                        currentPayment = rs.getString("payment_status");
+                    }
+                }
+            }
+
+            if (currentStatus == null) {
+                conn.rollback();
+                return false;
+            }
+            if ("Paid".equals(currentPayment)) {
+                conn.rollback();
+                return false;
+            }
+            if (!"Delivered".equals(currentStatus) && !"Completed".equals(currentStatus)) {
+                conn.rollback();
+                return false;
+            }
+
+            try (PreparedStatement ps = conn.prepareStatement("UPDATE orders SET payment_status = 'Paid' WHERE id = ?")) {
+                ps.setInt(1, orderId);
+                ps.executeUpdate();
+            }
+
+            double profit = 0;
+            String profitSql = "SELECT oi.quantity, oi.line_total, p.purchase_price " +
+                    "FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = ?";
+            try (PreparedStatement ps = conn.prepareStatement(profitSql)) {
+                ps.setInt(1, orderId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        profit += rs.getDouble("line_total") - (rs.getDouble("purchase_price") * rs.getInt("quantity"));
+                    }
+                }
+            }
+            capitalDAO.addEntry(conn, profit, "Sales Profit", "Profit from Order #" + orderId);
+
+            conn.commit();
+            return true;
         } catch (SQLException e) {
+            try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
             e.printStackTrace();
             return false;
+        } finally {
+            try { conn.setAutoCommit(true); } catch (SQLException ex) { ex.printStackTrace(); }
         }
+    }
+
+    public boolean cancelOrder(int orderId) {
+        Connection conn = DatabaseConnection.getConnection();
+        try {
+            conn.setAutoCommit(false);
+
+            String currentStatus = null;
+            String currentPayment = null;
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "SELECT order_status, payment_status FROM orders WHERE id = ?")) {
+                ps.setInt(1, orderId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        currentStatus = rs.getString("order_status");
+                        currentPayment = rs.getString("payment_status");
+                    }
+                }
+            }
+
+            if (currentStatus == null || !CANCELLABLE_STATUSES.contains(currentStatus)) {
+                conn.rollback();
+                return false;
+            }
+
+            String itemsSql = "SELECT product_id, quantity, line_total FROM order_items WHERE order_id = ?";
+            try (PreparedStatement psItems = conn.prepareStatement(itemsSql);
+                 PreparedStatement psStock = conn.prepareStatement(
+                         "UPDATE products SET stock_qty = stock_qty + ? WHERE id = ?");
+                 PreparedStatement psTxn = conn.prepareStatement(
+                         "INSERT INTO inventory_transactions(product_id, change_qty, reason, transaction_date) VALUES (?,?,?,?)")) {
+                psItems.setInt(1, orderId);
+                try (ResultSet rs = psItems.executeQuery()) {
+                    while (rs.next()) {
+                        int productId = rs.getInt("product_id");
+                        int qty = rs.getInt("quantity");
+
+                        psStock.setInt(1, qty);
+                        psStock.setInt(2, productId);
+                        psStock.executeUpdate();
+
+                        psTxn.setInt(1, productId);
+                        psTxn.setInt(2, qty);
+                        psTxn.setString(3, "Cancelled Order #" + orderId);
+                        psTxn.setString(4, LocalDateTime.now().toString());
+                        psTxn.executeUpdate();
+                    }
+                }
+            }
+
+            String newPaymentStatus = currentPayment;
+            if ("Paid".equals(currentPayment)) {
+                double profit = 0;
+                String profitSql = "SELECT oi.quantity, oi.line_total, p.purchase_price " +
+                        "FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = ?";
+                try (PreparedStatement ps = conn.prepareStatement(profitSql)) {
+                    ps.setInt(1, orderId);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        while (rs.next()) {
+                            profit += rs.getDouble("line_total") - (rs.getDouble("purchase_price") * rs.getInt("quantity"));
+                        }
+                    }
+                }
+                capitalDAO.addEntry(conn, -profit, "Sales Refund", "Refund - Cancelled Order #" + orderId);
+                newPaymentStatus = "Refunded";
+            }
+
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "UPDATE orders SET order_status = 'Cancelled', payment_status = ? WHERE id = ?")) {
+                ps.setString(1, newPaymentStatus);
+                ps.setInt(2, orderId);
+                ps.executeUpdate();
+            }
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            e.printStackTrace();
+            return false;
+        } finally {
+            try { conn.setAutoCommit(true); } catch (SQLException ex) { ex.printStackTrace(); }
+        }
+    }
+
+    public boolean isCancellable(String orderStatus) {
+        return CANCELLABLE_STATUSES.contains(orderStatus);
     }
 
     public int countAllOrders() {

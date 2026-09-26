@@ -11,7 +11,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 
-public class CategoryController extends AbstractCrudController<Category> {
+public class CategoryController {
 
     @FXML private TableView<Category> categoryTable;
     @FXML private TableColumn<Category, Integer> idColumn;
@@ -20,6 +20,7 @@ public class CategoryController extends AbstractCrudController<Category> {
 
     private final CategoryDAO categoryDAO = new CategoryDAO();
     private final ObservableList<Category> categoryList = FXCollections.observableArrayList();
+    private Category selectedCategory;
 
     @FXML
     public void initialize() {
@@ -28,27 +29,17 @@ public class CategoryController extends AbstractCrudController<Category> {
 
         categoryTable.setItems(categoryList);
         categoryTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) select(newVal);
+            if (newVal != null) {
+                selectedCategory = newVal;
+                nameField.setText(newVal.getName());
+            }
         });
 
         refresh();
     }
 
-    @Override
-    protected void refresh() {
+    private void refresh() {
         categoryList.setAll(categoryDAO.findAll());
-    }
-
-    @Override
-    protected void populateForm(Category c) {
-        nameField.setText(c.getName());
-    }
-
-    @Override
-    protected void clearForm() {
-        selectedItem = null;
-        nameField.clear();
-        categoryTable.getSelectionModel().clearSelection();
     }
 
     @FXML
@@ -59,7 +50,7 @@ public class CategoryController extends AbstractCrudController<Category> {
             return;
         }
         if (categoryDAO.add(name)) {
-            clearForm();
+            handleClear();
             refresh();
         } else {
             AlertUtil.error("Error", "Could not add category (it may already exist).");
@@ -68,8 +59,8 @@ public class CategoryController extends AbstractCrudController<Category> {
 
     @FXML
     private void handleUpdate() {
-        if (!hasSelection()) {
-            requireSelection();
+        if (selectedCategory == null) {
+            AlertUtil.warn("No selection", "Select a category to update first.");
             return;
         }
         String name = nameField.getText().trim();
@@ -77,21 +68,30 @@ public class CategoryController extends AbstractCrudController<Category> {
             AlertUtil.warn("Validation", "Please enter a category name.");
             return;
         }
-        categoryDAO.update(selectedItem.getId(), name);
+        categoryDAO.update(selectedCategory.getId(), name);
+        handleClear();
         refresh();
     }
 
     @FXML
     private void handleDelete() {
-        if (!hasSelection()) {
-            requireSelection();
+        if (selectedCategory == null) {
+            AlertUtil.warn("No selection", "Select a category to delete first.");
             return;
         }
-        if (confirmDelete(selectedItem.getName())) {
-            if (!categoryDAO.delete(selectedItem.getId())) {
+        if (AlertUtil.confirm("Confirm delete", "Delete category '" + selectedCategory.getName() + "'?")) {
+            if (!categoryDAO.delete(selectedCategory.getId())) {
                 AlertUtil.error("Error", "Could not delete this category. It may still be used by existing products.");
             }
+            handleClear();
             refresh();
         }
+    }
+
+    @FXML
+    private void handleClear() {
+        selectedCategory = null;
+        nameField.clear();
+        categoryTable.getSelectionModel().clearSelection();
     }
 }

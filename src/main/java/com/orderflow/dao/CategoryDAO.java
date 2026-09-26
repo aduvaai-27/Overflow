@@ -14,9 +14,7 @@ public class CategoryDAO {
         String sql = "SELECT * FROM categories ORDER BY name";
         try (Statement st = DatabaseConnection.getConnection().createStatement();
              ResultSet rs = st.executeQuery(sql)) {
-            while (rs.next()) {
-                list.add(new Category(rs.getInt("id"), rs.getString("name")));
-            }
+            while (rs.next()) list.add(map(rs));
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -55,5 +53,9 @@ public class CategoryDAO {
             e.printStackTrace();
             return false;
         }
+    }
+
+    private Category map(ResultSet rs) throws SQLException {
+        return new Category(rs.getInt("id"), rs.getString("name"));
     }
 }

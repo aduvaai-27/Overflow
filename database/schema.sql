@@ -1,4 +1,3 @@
-
 PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS users (
@@ -70,6 +69,14 @@ CREATE TABLE IF NOT EXISTS inventory_transactions (
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
+CREATE TABLE IF NOT EXISTS capital_transactions (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    amount           REAL NOT NULL,
+    source           TEXT NOT NULL,
+    reason           TEXT NOT NULL DEFAULT '',
+    transaction_date TEXT NOT NULL
+);
+
 INSERT OR IGNORE INTO users (id, username, password_hash, full_name, role)
 VALUES (1, 'admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'System Admin', 'Admin');
 
@@ -92,3 +99,6 @@ INSERT OR IGNORE INTO customers (id, name, phone, email, address) VALUES
  (1, 'Rahim Uddin', '01710000001', 'rahim@example.com', 'Khulna, Bangladesh'),
  (2, 'Karim Hossain', '01710000002', 'karim@example.com', 'Dhaka, Bangladesh'),
  (3, 'Fatema Akter', '01710000003', 'fatema@example.com', 'Rajshahi, Bangladesh');
+
+INSERT OR IGNORE INTO capital_transactions (id, amount, source, reason, transaction_date) VALUES
+ (1, 100000, 'Owner Investment', 'Opening capital', '2024-01-01T00:00:00');

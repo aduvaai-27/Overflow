@@ -4,6 +4,8 @@ import com.orderflow.dao.OrderDAO;
 import com.orderflow.model.Order;
 import com.orderflow.model.OrderItem;
 import com.orderflow.util.AlertUtil;
+import com.orderflow.util.DateUtil;
+import com.orderflow.util.TableColorUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -29,6 +31,9 @@ public class OrderController {
     @FXML private TableColumn<Order, String> paymentStatusColumn;
     @FXML private TableColumn<Order, String> orderStatusColumn;
 
+    @FXML private Button markPaidButton;
+    @FXML private Button cancelOrderButton;
+
     private final OrderDAO orderDAO = new OrderDAO();
     private final ObservableList<Order> orderList = FXCollections.observableArrayList();
 
@@ -38,18 +43,49 @@ public class OrderController {
     public void initialize() {
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         customerColumn.setCellValueFactory(new PropertyValueFactory<>("customerName"));
-        dateColumn.setCellValueFactory(new PropertyValueFactory<>("orderDate"));
+        dateColumn.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleStringProperty(DateUtil.formatForDisplay(cellData.getValue().getOrderDate())));
         totalColumn.setCellValueFactory(new PropertyValueFactory<>("total"));
         paymentMethodColumn.setCellValueFactory(new PropertyValueFactory<>("paymentMethod"));
         paymentStatusColumn.setCellValueFactory(new PropertyValueFactory<>("paymentStatus"));
         orderStatusColumn.setCellValueFactory(new PropertyValueFactory<>("orderStatus"));
+        TableColorUtil.colorizeText(paymentStatusColumn, value -> switch (value) {
+            case "Paid" -> "#2ecc71";
+            case "Refunded" -> "#e74c3c";
+            default -> "#e67e22";
+        });
+        TableColorUtil.colorizeText(orderStatusColumn, value -> switch (value) {
+            case "Confirmed" -> "#3498db";
+            case "Shipped" -> "#e67e22";
+            case "Delivered" -> "#1abc9c";
+            case "Completed" -> "#2ecc71";
+            case "Cancelled" -> "#e74c3c";
+            default -> "#95a5a6";
+        });
 
         orderTable.setItems(orderList);
+        orderTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> updateActionButtons(newVal));
+        updateActionButtons(null);
+
         refresh();
+    }
+
+    private void updateActionButtons(Order order) {
+        if (order == null) {
+            markPaidButton.setDisable(true);
+            cancelOrderButton.setDisable(true);
+            return;
+        }
+        boolean canMarkPaid = !"Paid".equals(order.getPaymentStatus())
+                && ("Delivered".equals(order.getOrderStatus()) || "Completed".equals(order.getOrderStatus()));
+        markPaidButton.setDisable(!canMarkPaid);
+
+        cancelOrderButton.setDisable(!orderDAO.isCancellable(order.getOrderStatus()));
     }
 
     private void refresh() {
         orderList.setAll(orderDAO.findAll());
+        updateActionButtons(orderTable.getSelectionModel().getSelectedItem());
     }
 
     @FXML
@@ -67,8 +103,7 @@ public class OrderController {
             dialog.setTitle("New Order");
             dialog.initModality(Modality.APPLICATION_MODAL);
             Scene scene = new Scene(root);
-            var cssUrl = getClass().getResource("/com/orderflow/css/style.css");
-            if (cssUrl != null) scene.getStylesheets().add(cssUrl.toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/com/orderflow/css/style.css").toExternalForm());
             dialog.setScene(scene);
             dialog.showAndWait();
 
@@ -164,11 +199,22 @@ public class OrderController {
     @FXML
     private void handleMarkPaid() {
         Order order = orderTable.getSelectionModel().getSelectedItem();
-        if (order == null) {
-            AlertUtil.warn("No selection", "Select an order first.");
-            return;
-        }
+        if (order == null) return;
+
         orderDAO.markPaymentPaid(order.getId());
         refresh();
+    }
+
+    @FXML
+    private void handleCancelOrder() {
+        Order order = orderTable.getSelectionModel().getSelectedItem();
+        if (order == null) return;
+
+        if (AlertUtil.confirm("Cancel order", "Cancel order #" + order.getId() + "? Reserved stock will be returned.")) {
+            if (!orderDAO.cancelOrder(order.getId())) {
+                AlertUtil.error("Error", "Could not cancel this order.");
+            }
+            refresh();
+        }
     }
 }

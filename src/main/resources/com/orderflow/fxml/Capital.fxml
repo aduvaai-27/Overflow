@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.orderflow.controller.CapitalController" spacing="15">
+
+    <Label text="Capital" styleClass="section-title"/>
+
+    <HBox spacing="15" alignment="CENTER_LEFT">
+        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4">
+            <Label text="Current Capital" styleClass="stat-card-label"/>
+            <Label fx:id="currentCapitalLabel" text="Tk 0.00" styleClass="stat-card-value"/>
+        </VBox>
+        <Button text="Add / Withdraw Capital" styleClass="button-primary" onAction="#handleAddCapital"/>
+        <Button text="Refresh" styleClass="button-secondary" onAction="#handleRefresh"/>
+    </HBox>
+
+    <Label text="History" styleClass="section-title"/>
+
+    <TableView fx:id="historyTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="amountColumn" text="Amount (Tk)" prefWidth="110"/>
+            <TableColumn fx:id="sourceColumn" text="Source" prefWidth="180"/>
+            <TableColumn fx:id="reasonColumn" text="Reason" prefWidth="260"/>
+            <TableColumn fx:id="dateColumn" text="Date" prefWidth="160"/>
+        </columns>
+    </TableView>
+
+</VBox>

@@ -3,6 +3,7 @@ package com.orderflow.controller;
 import com.orderflow.dao.OrderDAO;
 import com.orderflow.model.Order;
 import com.orderflow.util.AlertUtil;
+import com.orderflow.util.DateUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -38,7 +39,8 @@ public class ReportController {
     public void initialize() {
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         customerColumn.setCellValueFactory(new PropertyValueFactory<>("customerName"));
-        dateColumn.setCellValueFactory(new PropertyValueFactory<>("orderDate"));
+        dateColumn.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleStringProperty(DateUtil.formatForDisplay(cellData.getValue().getOrderDate())));
         totalColumn.setCellValueFactory(new PropertyValueFactory<>("total"));
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("orderStatus"));
 

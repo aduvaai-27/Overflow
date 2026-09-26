@@ -26,9 +26,7 @@ public class Main extends Application {
         FXMLLoader loader = new FXMLLoader(Main.class.getResource(fxmlPath));
         Parent root = loader.load();
         Scene scene = new Scene(root, 1000, 650);
-
-        var cssUrl = Main.class.getResource("/com/orderflow/css/style.css");
-        if (cssUrl != null) scene.getStylesheets().add(cssUrl.toExternalForm());
+        scene.getStylesheets().add(Main.class.getResource("/com/orderflow/css/style.css").toExternalForm());
 
         primaryStage.setTitle(title);
         primaryStage.setScene(scene);

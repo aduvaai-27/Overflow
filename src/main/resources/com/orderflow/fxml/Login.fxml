@@ -29,7 +29,6 @@
         <Label fx:id="errorLabel" styleClass="error-label" visible="false" wrapText="true"/>
 
         <Button text="Login" styleClass="button-primary" maxWidth="Infinity" onAction="#handleLogin"/>
-        <Label text="Default login: admin / admin123" style="-fx-font-size: 10px; -fx-text-fill: #95a5a6;"/>
 
         <padding>
             <Insets top="10" bottom="10" left="10" right="10"/>

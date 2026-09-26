@@ -19,8 +19,6 @@ public class DatabaseConnection {
     public static synchronized Connection getConnection() {
         try {
             if (connection == null || connection.isClosed()) {
-                boolean isNewDatabase = !Files.exists(Paths.get(DB_FILE));
-
                 Class.forName("org.sqlite.JDBC");
                 connection = DriverManager.getConnection(URL);
 
@@ -28,9 +26,7 @@ public class DatabaseConnection {
                     st.execute("PRAGMA foreign_keys = ON;");
                 }
 
-                if (isNewDatabase) {
-                    initializeSchema();
-                }
+                initializeSchema();
             }
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
@@ -43,8 +39,8 @@ public class DatabaseConnection {
         try {
             String sql = readSchemaFile();
             try (Statement st = connection.createStatement()) {
-
-                for (String rawStatement : sql.split(";")) {
+                String withoutComments = sql.replaceAll("(?m)^\\s*--.*$", "");
+                for (String rawStatement : withoutComments.split(";")) {
                     String statement = rawStatement.trim();
                     if (!statement.isEmpty()) {
                         st.execute(statement);
@@ -58,7 +54,6 @@ public class DatabaseConnection {
     }
 
     private static String readSchemaFile() throws IOException {
-
         Path devPath = Paths.get("database", "schema.sql");
         if (Files.exists(devPath)) {
             return Files.readString(devPath);

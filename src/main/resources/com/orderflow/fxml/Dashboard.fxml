@@ -1,49 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.orderflow.controller.DashboardController" spacing="20">
+<ScrollPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.orderflow.controller.DashboardController" fitToWidth="true">
+<VBox spacing="20" style="-fx-padding: 0 4 20 0;">
 
     <Label text="Business Overview" styleClass="section-title"/>
 
     <HBox spacing="15">
-        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4">
+        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4" style="-fx-border-color: #3498db; -fx-border-width: 0 0 0 4;">
             <Label text="Total Products" styleClass="stat-card-label"/>
             <Label fx:id="totalProductsLabel" text="0" styleClass="stat-card-value"/>
         </VBox>
-        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4">
+        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4" style="-fx-border-color: #9b59b6; -fx-border-width: 0 0 0 4;">
             <Label text="Total Customers" styleClass="stat-card-label"/>
             <Label fx:id="totalCustomersLabel" text="0" styleClass="stat-card-value"/>
         </VBox>
-        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4">
+        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4" style="-fx-border-color: #1abc9c; -fx-border-width: 0 0 0 4;">
             <Label text="Total Orders" styleClass="stat-card-label"/>
             <Label fx:id="totalOrdersLabel" text="0" styleClass="stat-card-value"/>
         </VBox>
-        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4">
+        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4" style="-fx-border-color: #2ecc71; -fx-border-width: 0 0 0 4;">
             <Label text="Total Revenue (Tk)" styleClass="stat-card-label"/>
             <Label fx:id="totalRevenueLabel" text="0" styleClass="stat-card-value"/>
+            <Label fx:id="totalRevenueUsdLabel" text="" style="-fx-font-size: 11px; -fx-text-fill: #95a5a6;"/>
+        </VBox>
+        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4" style="-fx-border-color: #f39c12; -fx-border-width: 0 0 0 4;">
+            <Label text="Capital (Tk)" styleClass="stat-card-label"/>
+            <Label fx:id="capitalLabel" text="0" styleClass="stat-card-value"/>
+            <Label fx:id="capitalUsdLabel" text="" style="-fx-font-size: 11px; -fx-text-fill: #95a5a6;"/>
         </VBox>
     </HBox>
 
     <HBox spacing="15">
-        <VBox styleClass="stat-card, stat-card-alert" alignment="CENTER_LEFT" spacing="4">
-            <Label text="Low Stock Alerts" styleClass="stat-card-label"/>
-            <Label fx:id="lowStockLabel" text="0" styleClass="stat-card-value"/>
+        <VBox styleClass="stat-card, stat-card-alert" alignment="CENTER_LEFT" spacing="4" style="-fx-border-color: #e74c3c; -fx-border-width: 0 0 0 4;">
+            <Label text="Low Stock Alerts (live)" styleClass="stat-card-label"/>
+            <Label fx:id="lowStockLabel" text="checking..." styleClass="stat-card-value"/>
         </VBox>
-        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4">
+        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4" style="-fx-border-color: #e67e22; -fx-border-width: 0 0 0 4;">
             <Label text="Pending COD Orders" styleClass="stat-card-label"/>
             <Label fx:id="pendingCodLabel" text="0" styleClass="stat-card-value"/>
         </VBox>
     </HBox>
 
-    <HBox spacing="15" alignment="CENTER_LEFT" styleClass="stat-card">
-        <Label text="USD to BDT rate:"/>
-        <Label fx:id="exchangeRateLabel" text="Not fetched yet" styleClass="stat-card-label"/>
-        <Button text="Refresh Rate" styleClass="button-secondary" onAction="#handleRefreshRate"/>
-    </HBox>
-
 </VBox>
+</ScrollPane>

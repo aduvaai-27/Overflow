@@ -18,19 +18,19 @@ public class ExchangeRateService {
             @Override
             protected Double call() throws Exception {
                 HttpClient client = HttpClient.newBuilder()
-                        .connectTimeout(Duration.ofSeconds(8))
+                        .connectTimeout(Duration.ofSeconds(5))
                         .build();
 
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(API_URL))
-                        .timeout(Duration.ofSeconds(8))
+                        .timeout(Duration.ofSeconds(5))
                         .GET()
                         .build();
 
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
                 if (response.statusCode() != 200) {
-                    throw new RuntimeException("API returned status code " + response.statusCode());
+                    throw new RuntimeException("Exchange rate API returned HTTP " + response.statusCode());
                 }
 
                 JSONObject json = new JSONObject(response.body());

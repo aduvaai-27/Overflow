@@ -10,7 +10,8 @@ import java.util.List;
 public class ProductDAO {
 
     private static final String SELECT_BASE =
-            "SELECT p.*, c.name AS category_name FROM products p " +
+            "SELECT p.*, c.name AS category_name " +
+            "FROM products p " +
             "LEFT JOIN categories c ON p.category_id = c.id ";
 
     public List<Product> findAllActive() {

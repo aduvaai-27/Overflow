@@ -47,6 +47,7 @@
         <TextField fx:id="searchField" promptText="Search by name or phone..." prefWidth="250"/>
         <Button text="Search" styleClass="button-secondary" onAction="#handleSearch"/>
         <Button text="Show All" styleClass="button-secondary" onAction="#handleShowAll"/>
+        <Button text="View History" styleClass="button-primary" onAction="#handleViewHistory"/>
     </HBox>
 
     <TableView fx:id="customerTable" VBox.vgrow="ALWAYS">

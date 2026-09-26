@@ -16,6 +16,7 @@
             <Label text="Order &amp; Inventory System" styleClass="sidebar-subtitle"/>
 
             <Button fx:id="btnDashboard" text="Dashboard" styleClass="nav-button" maxWidth="Infinity" onAction="#showDashboard"/>
+            <Button fx:id="btnCapital" text="Capital" styleClass="nav-button" maxWidth="Infinity" onAction="#showCapital"/>
             <Button fx:id="btnCategories" text="Categories" styleClass="nav-button" maxWidth="Infinity" onAction="#showCategories"/>
             <Button fx:id="btnProducts" text="Products" styleClass="nav-button" maxWidth="Infinity" onAction="#showProducts"/>
             <Button fx:id="btnCustomers" text="Customers" styleClass="nav-button" maxWidth="Infinity" onAction="#showCustomers"/>

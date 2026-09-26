@@ -18,6 +18,7 @@ public class MainController {
     @FXML private Label welcomeLabel;
 
     @FXML private Button btnDashboard;
+    @FXML private Button btnCapital;
     @FXML private Button btnCategories;
     @FXML private Button btnProducts;
     @FXML private Button btnCustomers;
@@ -38,6 +39,11 @@ public class MainController {
     @FXML
     public void showDashboard() {
         load("/com/orderflow/fxml/Dashboard.fxml", "Dashboard", btnDashboard);
+    }
+
+    @FXML
+    public void showCapital() {
+        load("/com/orderflow/fxml/Capital.fxml", "Capital", btnCapital);
     }
 
     @FXML
@@ -100,7 +106,7 @@ public class MainController {
     }
 
     private void highlightActiveButton(Button active) {
-        for (Button b : new Button[]{btnDashboard, btnCategories, btnProducts, btnCustomers, btnOrders, btnReports}) {
+        for (Button b : new Button[]{btnDashboard, btnCapital, btnCategories, btnProducts, btnCustomers, btnOrders, btnReports}) {
             b.getStyleClass().remove("nav-button-active");
         }
         if (!active.getStyleClass().contains("nav-button-active")) {

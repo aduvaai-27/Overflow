@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
@@ -16,7 +17,16 @@
         <Button text="+ New Order" styleClass="button-primary" onAction="#handleNewOrder"/>
         <Button text="View Invoice" styleClass="button-secondary" onAction="#handleViewInvoice"/>
         <Button text="Advance Status" styleClass="button-secondary" onAction="#handleAdvanceStatus"/>
-        <Button text="Mark COD Collected" styleClass="button-secondary" onAction="#handleMarkPaid"/>
+        <Button fx:id="markPaidButton" text="Mark COD Collected" styleClass="button-secondary" onAction="#handleMarkPaid">
+            <tooltip>
+                <Tooltip text="Enabled once the selected order is Delivered (or Completed) and not already Paid."/>
+            </tooltip>
+        </Button>
+        <Button fx:id="cancelOrderButton" text="Cancel Order" styleClass="button-danger" onAction="#handleCancelOrder">
+            <tooltip>
+                <Tooltip text="Enabled while the selected order hasn't shipped yet."/>
+            </tooltip>
+        </Button>
         <Button text="Refresh" styleClass="button-secondary" onAction="#handleRefresh"/>
     </HBox>
 
