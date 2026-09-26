@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.orderflow.controller.ReportController" spacing="15">
+
+    <Label text="Sales Report" styleClass="section-title"/>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="From:"/>
+        <DatePicker fx:id="fromDatePicker"/>
+        <Label text="To:"/>
+        <DatePicker fx:id="toDatePicker"/>
+        <Button text="Generate Report" styleClass="button-primary" onAction="#handleGenerate"/>
+    </HBox>
+
+    <HBox spacing="15">
+        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4">
+            <Label text="Orders in range" styleClass="stat-card-label"/>
+            <Label fx:id="orderCountLabel" text="0" styleClass="stat-card-value"/>
+        </VBox>
+        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4">
+            <Label text="Revenue in range (Tk)" styleClass="stat-card-label"/>
+            <Label fx:id="revenueLabel" text="0.00" styleClass="stat-card-value"/>
+        </VBox>
+        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4">
+            <Label text="Average Order Value (Tk)" styleClass="stat-card-label"/>
+            <Label fx:id="avgOrderLabel" text="0.00" styleClass="stat-card-value"/>
+        </VBox>
+    </HBox>
+
+    <TableView fx:id="reportTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="idColumn" text="Order #" prefWidth="70"/>
+            <TableColumn fx:id="customerColumn" text="Customer" prefWidth="150"/>
+            <TableColumn fx:id="dateColumn" text="Date" prefWidth="150"/>
+            <TableColumn fx:id="totalColumn" text="Total (Tk)" prefWidth="90"/>
+            <TableColumn fx:id="statusColumn" text="Status" prefWidth="100"/>
+        </columns>
+    </TableView>
+
+</VBox>

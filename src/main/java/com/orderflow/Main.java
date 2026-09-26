@@ -27,6 +27,9 @@ public class Main extends Application {
         Parent root = loader.load();
         Scene scene = new Scene(root, 1000, 650);
 
+        var cssUrl = Main.class.getResource("/com/orderflow/css/style.css");
+        if (cssUrl != null) scene.getStylesheets().add(cssUrl.toExternalForm());
+
         primaryStage.setTitle(title);
         primaryStage.setScene(scene);
         primaryStage.setMinWidth(900);
