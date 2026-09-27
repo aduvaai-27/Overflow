@@ -16,6 +16,7 @@ public class CategoryController {
     @FXML private TableView<Category> categoryTable;
     @FXML private TableColumn<Category, Integer> idColumn;
     @FXML private TableColumn<Category, String> nameColumn;
+    @FXML private TableColumn<Category, String> suppliersColumn;
     @FXML private TextField nameField;
 
     private final CategoryDAO categoryDAO = new CategoryDAO();
@@ -26,6 +27,10 @@ public class CategoryController {
     public void initialize() {
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        suppliersColumn.setCellValueFactory(cellData -> {
+            String suppliers = cellData.getValue().getSuppliersDisplay();
+            return new javafx.beans.property.SimpleStringProperty(suppliers == null ? "-" : suppliers);
+        });
 
         categoryTable.setItems(categoryList);
         categoryTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {

@@ -10,7 +10,10 @@ import java.util.List;
 public class ProductDAO {
 
     private static final String SELECT_BASE =
-            "SELECT p.*, c.name AS category_name " +
+            "SELECT p.*, c.name AS category_name, " +
+            "(SELECT GROUP_CONCAT(s.name, ', ') FROM category_suppliers cs " +
+            " JOIN suppliers s ON cs.supplier_id = s.id WHERE cs.category_id = c.id) AS supplier_names, " +
+            "(SELECT GROUP_CONCAT(cs.supplier_id) FROM category_suppliers cs WHERE cs.category_id = c.id) AS supplier_ids " +
             "FROM products p " +
             "LEFT JOIN categories c ON p.category_id = c.id ";
 
@@ -149,7 +152,7 @@ public class ProductDAO {
     }
 
     private Product map(ResultSet rs) throws SQLException {
-        return new Product(
+        Product p = new Product(
                 rs.getInt("id"),
                 rs.getString("name"),
                 rs.getString("sku"),
@@ -161,5 +164,15 @@ public class ProductDAO {
                 rs.getInt("min_stock"),
                 rs.getInt("active") == 1
         );
+        String supplierIdsRaw = rs.getString("supplier_ids");
+        java.util.Set<Integer> supplierIds = new java.util.HashSet<>();
+        if (supplierIdsRaw != null && !supplierIdsRaw.isBlank()) {
+            for (String idStr : supplierIdsRaw.split(",")) {
+                supplierIds.add(Integer.parseInt(idStr.trim()));
+            }
+        }
+        p.setSupplierIds(supplierIds);
+        p.setSupplierNamesDisplay(rs.getString("supplier_names"));
+        return p;
     }
 }

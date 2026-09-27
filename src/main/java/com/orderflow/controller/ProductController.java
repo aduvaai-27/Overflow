@@ -28,6 +28,8 @@ public class ProductController {
     @FXML private TableColumn<Product, String> nameColumn;
     @FXML private TableColumn<Product, String> skuColumn;
     @FXML private TableColumn<Product, String> categoryColumn;
+    @FXML private TableColumn<Product, String> supplierColumn;
+    @FXML private Label supplierHintLabel;
     @FXML private TableColumn<Product, Double> purchasePriceColumn;
     @FXML private TableColumn<Product, Double> sellingPriceColumn;
     @FXML private TableColumn<Product, Integer> stockColumn;
@@ -46,6 +48,10 @@ public class ProductController {
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         skuColumn.setCellValueFactory(new PropertyValueFactory<>("sku"));
         categoryColumn.setCellValueFactory(new PropertyValueFactory<>("categoryName"));
+        supplierColumn.setCellValueFactory(cellData -> {
+            String supplierNames = cellData.getValue().getSupplierNamesDisplay();
+            return new javafx.beans.property.SimpleStringProperty(supplierNames == null || supplierNames.isBlank() ? "-" : supplierNames);
+        });
         purchasePriceColumn.setCellValueFactory(new PropertyValueFactory<>("purchasePrice"));
         sellingPriceColumn.setCellValueFactory(new PropertyValueFactory<>("sellingPrice"));
         stockColumn.setCellValueFactory(new PropertyValueFactory<>("stockQty"));
@@ -63,6 +69,7 @@ public class ProductController {
         });
 
         categoryCombo.setItems(FXCollections.observableArrayList(categoryDAO.findAll()));
+        categoryCombo.valueProperty().addListener((obs, oldVal, newVal) -> updateSupplierHint(newVal));
 
         productTable.setItems(productList);
         productTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
@@ -74,6 +81,16 @@ public class ProductController {
 
     private void refresh() {
         productList.setAll(productDAO.findAll());
+    }
+
+    private void updateSupplierHint(Category category) {
+        if (category == null) {
+            supplierHintLabel.setText("(select a category)");
+        } else if (category.getSuppliersDisplay() == null || category.getSuppliersDisplay().isBlank()) {
+            supplierHintLabel.setText("No supplier assigned to this category yet");
+        } else {
+            supplierHintLabel.setText(category.getSuppliersDisplay());
+        }
     }
 
     private void populateForm(Product p) {
@@ -149,6 +166,7 @@ public class ProductController {
         minStockField.clear();
         categoryCombo.getSelectionModel().clearSelection();
         productTable.getSelectionModel().clearSelection();
+        supplierHintLabel.setText("(select a category)");
     }
 
     @FXML

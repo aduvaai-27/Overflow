@@ -1,11 +1,16 @@
 package com.orderflow.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class Product {
     private int id;
     private String name;
     private String sku;
     private int categoryId;
     private String categoryName;
+    private Set<Integer> supplierIds = new HashSet<>();
+    private String supplierNamesDisplay;
     private double purchasePrice;
     private double sellingPrice;
     private int stockQty;
@@ -44,6 +49,12 @@ public class Product {
 
     public String getCategoryName() { return categoryName; }
     public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
+
+    public Set<Integer> getSupplierIds() { return supplierIds; }
+    public void setSupplierIds(Set<Integer> supplierIds) { this.supplierIds = supplierIds; }
+
+    public String getSupplierNamesDisplay() { return supplierNamesDisplay; }
+    public void setSupplierNamesDisplay(String supplierNamesDisplay) { this.supplierNamesDisplay = supplierNamesDisplay; }
 
     public double getPurchasePrice() { return purchasePrice; }
     public void setPurchasePrice(double purchasePrice) { this.purchasePrice = purchasePrice; }

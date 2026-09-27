@@ -8,9 +8,25 @@ CREATE TABLE IF NOT EXISTS users (
     role          TEXT NOT NULL DEFAULT 'Staff'
 );
 
+CREATE TABLE IF NOT EXISTS suppliers (
+    id      INTEGER PRIMARY KEY AUTOINCREMENT,
+    name    TEXT NOT NULL,
+    phone   TEXT,
+    email   TEXT,
+    address TEXT
+);
+
 CREATE TABLE IF NOT EXISTS categories (
     id   INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS category_suppliers (
+    category_id INTEGER NOT NULL,
+    supplier_id INTEGER NOT NULL,
+    PRIMARY KEY (category_id, supplier_id),
+    FOREIGN KEY (category_id) REFERENCES categories(id),
+    FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
 );
 
 CREATE TABLE IF NOT EXISTS products (
@@ -69,6 +85,19 @@ CREATE TABLE IF NOT EXISTS inventory_transactions (
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
+CREATE TABLE IF NOT EXISTS supplier_requests (
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    supplier_id    INTEGER NOT NULL,
+    product_id     INTEGER NOT NULL,
+    quantity       INTEGER NOT NULL,
+    unit_cost      REAL NOT NULL,
+    phase          TEXT NOT NULL DEFAULT 'Requested',
+    request_date   TEXT NOT NULL,
+    completed_date TEXT,
+    FOREIGN KEY (supplier_id) REFERENCES suppliers(id),
+    FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
 CREATE TABLE IF NOT EXISTS capital_transactions (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,
     amount           REAL NOT NULL,
@@ -80,11 +109,21 @@ CREATE TABLE IF NOT EXISTS capital_transactions (
 INSERT OR IGNORE INTO users (id, username, password_hash, full_name, role)
 VALUES (1, 'admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'System Admin', 'Admin');
 
+INSERT OR IGNORE INTO suppliers (id, name, phone, email, address) VALUES
+ (1, 'Dhaka Electronics Wholesale', '01910000001', 'sales@dhakaelectronics.example', 'Dhaka, Bangladesh'),
+ (2, 'Khulna Garments Supply', '01910000002', 'info@khulnagarments.example', 'Khulna, Bangladesh'),
+ (3, 'Rajshahi Textile Traders', '01910000003', 'info@rajshahitextile.example', 'Rajshahi, Bangladesh');
+
 INSERT OR IGNORE INTO categories (id, name) VALUES
  (1, 'Electronics'),
  (2, 'Clothing'),
  (3, 'Groceries'),
  (4, 'Accessories');
+
+INSERT OR IGNORE INTO category_suppliers (category_id, supplier_id) VALUES
+ (1, 1),
+ (2, 2),
+ (2, 3);
 
 INSERT OR IGNORE INTO products (id, name, sku, category_id, purchase_price, selling_price, stock_qty, min_stock, active) VALUES
  (1, 'Wireless Mouse', 'ELEC-001', 1, 400, 650, 25, 5, 1),

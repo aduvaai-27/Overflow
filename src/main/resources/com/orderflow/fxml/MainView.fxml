@@ -21,6 +21,7 @@
             <Button fx:id="btnProducts" text="Products" styleClass="nav-button" maxWidth="Infinity" onAction="#showProducts"/>
             <Button fx:id="btnCustomers" text="Customers" styleClass="nav-button" maxWidth="Infinity" onAction="#showCustomers"/>
             <Button fx:id="btnOrders" text="Orders" styleClass="nav-button" maxWidth="Infinity" onAction="#showOrders"/>
+            <Button fx:id="btnSuppliers" text="Suppliers" styleClass="nav-button" maxWidth="Infinity" onAction="#showSuppliers"/>
             <Button fx:id="btnReports" text="Reports" styleClass="nav-button" maxWidth="Infinity" onAction="#showReports"/>
 
             <VBox VBox.vgrow="ALWAYS"/>

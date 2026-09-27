@@ -46,6 +46,10 @@
         <Label text="Min Stock" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
         <TextField fx:id="minStockField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
+        <Label text="Supplier" GridPane.rowIndex="3" GridPane.columnIndex="2"/>
+        <Label fx:id="supplierHintLabel" text="(select a category)" GridPane.rowIndex="3" GridPane.columnIndex="3"
+               style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+
         <HBox spacing="10" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="4">
             <Button text="Add Product" styleClass="button-primary" onAction="#handleAdd"/>
             <Button text="Update Selected" styleClass="button-secondary" onAction="#handleUpdate"/>
@@ -66,6 +70,7 @@
             <TableColumn fx:id="nameColumn" text="Name" prefWidth="150"/>
             <TableColumn fx:id="skuColumn" text="SKU" prefWidth="90"/>
             <TableColumn fx:id="categoryColumn" text="Category" prefWidth="100"/>
+            <TableColumn fx:id="supplierColumn" text="Supplier" prefWidth="150"/>
             <TableColumn fx:id="purchasePriceColumn" text="Purchase Price" prefWidth="100"/>
             <TableColumn fx:id="sellingPriceColumn" text="Selling Price" prefWidth="100"/>
             <TableColumn fx:id="stockColumn" text="Stock" prefWidth="70"/>

@@ -1,0 +1,287 @@
+package com.orderflow.controller;
+
+import com.orderflow.dao.CategoryDAO;
+import com.orderflow.dao.ProductDAO;
+import com.orderflow.dao.SupplierDAO;
+import com.orderflow.dao.SupplierRequestDAO;
+import com.orderflow.model.Category;
+import com.orderflow.model.Product;
+import com.orderflow.model.Supplier;
+import com.orderflow.model.SupplierRequest;
+import com.orderflow.util.AlertUtil;
+import com.orderflow.util.DateUtil;
+import com.orderflow.util.TableColorUtil;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.FlowPane;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+public class SupplierController {
+
+    @FXML private TextField nameField;
+    @FXML private TextField phoneField;
+    @FXML private TextField emailField;
+    @FXML private TextField addressField;
+    @FXML private FlowPane categoryCheckboxBox;
+
+    @FXML private TableView<Supplier> supplierTable;
+    @FXML private TableColumn<Supplier, Integer> idColumn;
+    @FXML private TableColumn<Supplier, String> nameColumn;
+    @FXML private TableColumn<Supplier, String> phoneColumn;
+    @FXML private TableColumn<Supplier, String> emailColumn;
+    @FXML private TableColumn<Supplier, String> addressColumn;
+    @FXML private TableColumn<Supplier, String> categoriesColumn;
+
+    @FXML private ComboBox<Supplier> supplierCombo;
+    @FXML private ComboBox<Product> productCombo;
+    @FXML private Label productHintLabel;
+    @FXML private Spinner<Integer> qtySpinner;
+    @FXML private TextField unitCostField;
+
+    @FXML private TableView<SupplierRequest> requestTable;
+    @FXML private TableColumn<SupplierRequest, Integer> reqIdColumn;
+    @FXML private TableColumn<SupplierRequest, String> reqSupplierColumn;
+    @FXML private TableColumn<SupplierRequest, String> reqProductColumn;
+    @FXML private TableColumn<SupplierRequest, Integer> reqQtyColumn;
+    @FXML private TableColumn<SupplierRequest, Double> reqUnitCostColumn;
+    @FXML private TableColumn<SupplierRequest, Double> reqTotalCostColumn;
+    @FXML private TableColumn<SupplierRequest, String> reqPhaseColumn;
+    @FXML private TableColumn<SupplierRequest, String> reqDateColumn;
+
+    private final SupplierDAO supplierDAO = new SupplierDAO();
+    private final ProductDAO productDAO = new ProductDAO();
+    private final CategoryDAO categoryDAO = new CategoryDAO();
+    private final SupplierRequestDAO requestDAO = new SupplierRequestDAO();
+
+    private final ObservableList<Supplier> supplierList = FXCollections.observableArrayList();
+    private final ObservableList<SupplierRequest> requestList = FXCollections.observableArrayList();
+    private final List<CheckBox> categoryCheckboxes = new java.util.ArrayList<>();
+    private List<Product> allActiveProducts = List.of();
+    private Supplier selectedSupplier;
+
+    @FXML
+    public void initialize() {
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        phoneColumn.setCellValueFactory(new PropertyValueFactory<>("phone"));
+        emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
+        addressColumn.setCellValueFactory(new PropertyValueFactory<>("address"));
+        categoriesColumn.setCellValueFactory(cellData -> {
+            String cats = cellData.getValue().getCategoriesDisplay();
+            return new javafx.beans.property.SimpleStringProperty(cats == null || cats.isBlank() ? "-" : cats);
+        });
+        supplierTable.setItems(supplierList);
+        supplierTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) populateForm(newVal);
+        });
+
+        reqIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        reqSupplierColumn.setCellValueFactory(new PropertyValueFactory<>("supplierName"));
+        reqProductColumn.setCellValueFactory(new PropertyValueFactory<>("productName"));
+        reqQtyColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+        reqUnitCostColumn.setCellValueFactory(new PropertyValueFactory<>("unitCost"));
+        reqTotalCostColumn.setCellValueFactory(new PropertyValueFactory<>("totalCost"));
+        reqPhaseColumn.setCellValueFactory(new PropertyValueFactory<>("phase"));
+        TableColorUtil.colorizeText(reqPhaseColumn, value -> switch (value) {
+            case "Shipped" -> "#3498db";
+            case "Completed" -> "#2ecc71";
+            default -> "#e67e22";
+        });
+        reqDateColumn.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleStringProperty(DateUtil.formatForDisplay(cellData.getValue().getRequestDate())));
+        requestTable.setItems(requestList);
+
+        qtySpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100000, 1));
+
+        supplierCombo.valueProperty().addListener((obs, oldVal, newVal) -> filterProductsBySupplier(newVal));
+
+        productCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                unitCostField.setText(String.format("%.2f", newVal.getPurchasePrice()));
+            }
+        });
+
+        refreshAll();
+    }
+
+    private void refreshAll() {
+        rebuildCategoryCheckboxes();
+        supplierList.setAll(supplierDAO.findAll());
+        supplierCombo.setItems(FXCollections.observableArrayList(supplierDAO.findAll()));
+        allActiveProducts = productDAO.findAllActive();
+        filterProductsBySupplier(supplierCombo.getValue());
+        requestList.setAll(requestDAO.findAll());
+    }
+
+    private void rebuildCategoryCheckboxes() {
+        Set<Integer> previouslyChecked = categoryCheckboxes.stream()
+                .filter(CheckBox::isSelected)
+                .map(cb -> (Integer) cb.getUserData())
+                .collect(Collectors.toSet());
+
+        categoryCheckboxes.clear();
+        categoryCheckboxBox.getChildren().clear();
+        for (Category category : categoryDAO.findAll()) {
+            CheckBox checkBox = new CheckBox(category.getName());
+            checkBox.setUserData(category.getId());
+            checkBox.setSelected(previouslyChecked.contains(category.getId()));
+            categoryCheckboxes.add(checkBox);
+            categoryCheckboxBox.getChildren().add(checkBox);
+        }
+    }
+
+    private Set<Integer> selectedCategoryIds() {
+        return categoryCheckboxes.stream()
+                .filter(CheckBox::isSelected)
+                .map(cb -> (Integer) cb.getUserData())
+                .collect(Collectors.toSet());
+    }
+
+    private void filterProductsBySupplier(Supplier supplier) {
+        productCombo.getSelectionModel().clearSelection();
+        if (supplier == null) {
+            productCombo.setItems(FXCollections.observableArrayList(allActiveProducts));
+            productHintLabel.setText("Choose a supplier to see only the products they provide.");
+            return;
+        }
+        List<Product> filtered = allActiveProducts.stream()
+                .filter(p -> p.getSupplierIds().contains(supplier.getId()))
+                .collect(Collectors.toList());
+        productCombo.setItems(FXCollections.observableArrayList(filtered));
+        productHintLabel.setText(filtered.isEmpty()
+                ? "No products under " + supplier.getName() + "'s categories yet."
+                : filtered.size() + " product(s) supplied by " + supplier.getName());
+    }
+
+    private void populateForm(Supplier s) {
+        selectedSupplier = s;
+        nameField.setText(s.getName());
+        phoneField.setText(s.getPhone());
+        emailField.setText(s.getEmail());
+        addressField.setText(s.getAddress());
+
+        Set<Integer> linkedCategoryIds = supplierDAO.findCategoryIdsForSupplier(s.getId());
+        for (CheckBox cb : categoryCheckboxes) {
+            cb.setSelected(linkedCategoryIds.contains((Integer) cb.getUserData()));
+        }
+    }
+
+    @FXML
+    private void handleAddSupplier() {
+        Supplier s = buildFromForm(0);
+        if (s == null) return;
+        if (supplierDAO.add(s, selectedCategoryIds())) {
+            handleClearSupplierForm();
+            refreshAll();
+        } else {
+            AlertUtil.error("Error", "Could not add supplier.");
+        }
+    }
+
+    @FXML
+    private void handleUpdateSupplier() {
+        if (selectedSupplier == null) {
+            AlertUtil.warn("No selection", "Select a supplier from the table first.");
+            return;
+        }
+        Supplier s = buildFromForm(selectedSupplier.getId());
+        if (s == null) return;
+        supplierDAO.update(s, selectedCategoryIds());
+        handleClearSupplierForm();
+        refreshAll();
+    }
+
+    @FXML
+    private void handleDeleteSupplier() {
+        if (selectedSupplier == null) {
+            AlertUtil.warn("No selection", "Select a supplier from the table first.");
+            return;
+        }
+        if (AlertUtil.confirm("Confirm delete", "Delete supplier '" + selectedSupplier.getName() + "'?")) {
+            if (!supplierDAO.delete(selectedSupplier.getId())) {
+                AlertUtil.error("Error", "Could not delete this supplier. They may already have restock requests on file.");
+            }
+            handleClearSupplierForm();
+            refreshAll();
+        }
+    }
+
+    @FXML
+    private void handleClearSupplierForm() {
+        selectedSupplier = null;
+        nameField.clear();
+        phoneField.clear();
+        emailField.clear();
+        addressField.clear();
+        for (CheckBox cb : categoryCheckboxes) cb.setSelected(false);
+        supplierTable.getSelectionModel().clearSelection();
+    }
+
+    private Supplier buildFromForm(int id) {
+        String name = nameField.getText().trim();
+        if (name.isEmpty()) {
+            AlertUtil.warn("Validation", "Supplier (company) name is required.");
+            return null;
+        }
+        return new Supplier(id, name, phoneField.getText().trim(), emailField.getText().trim(), addressField.getText().trim());
+    }
+
+    @FXML
+    private void handleSendRequest() {
+        Supplier supplier = supplierCombo.getValue();
+        Product product = productCombo.getValue();
+        Integer qty = qtySpinner.getValue();
+
+        if (supplier == null) {
+            AlertUtil.warn("Validation", "Choose a supplier (company) to request stock from.");
+            return;
+        }
+        if (product == null) {
+            AlertUtil.warn("Validation", "Choose a product to restock.");
+            return;
+        }
+        double unitCost;
+        try {
+            unitCost = Double.parseDouble(unitCostField.getText().trim());
+            if (unitCost < 0) throw new NumberFormatException();
+        } catch (NumberFormatException e) {
+            AlertUtil.warn("Validation", "Enter a valid unit cost (what you pay the supplier per unit).");
+            return;
+        }
+
+        if (requestDAO.createRequest(supplier.getId(), product.getId(), qty, unitCost)) {
+            AlertUtil.info("Request sent", "Restock request sent to " + supplier.getName() + ".");
+            refreshAll();
+        } else {
+            AlertUtil.error("Error", "Could not create the restock request.");
+        }
+    }
+
+    @FXML
+    private void handleAdvancePhase() {
+        SupplierRequest request = requestTable.getSelectionModel().getSelectedItem();
+        if (request == null) {
+            AlertUtil.warn("No selection", "Select a restock request first.");
+            return;
+        }
+        if ("Completed".equals(request.getPhase())) {
+            return;
+        }
+
+        if (!requestDAO.advancePhase(request)) {
+            AlertUtil.error("Error", "Could not advance this request's phase.");
+        }
+        refreshAll();
+    }
+
+    @FXML
+    private void handleRefresh() {
+        refreshAll();
+    }
+}
