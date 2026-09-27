@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.HBox?>
@@ -45,7 +48,19 @@
             <Label text="Pending COD Orders" styleClass="stat-card-label"/>
             <Label fx:id="pendingCodLabel" text="0" styleClass="stat-card-value"/>
         </VBox>
+        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4" style="-fx-border-color: #34495e; -fx-border-width: 0 0 0 4;">
+            <Label text="Best Customer (most orders)" styleClass="stat-card-label"/>
+            <Label fx:id="bestCustomerLabel" text="-" styleClass="stat-card-value" style="-fx-font-size: 15px;"/>
+        </VBox>
     </HBox>
+
+    <VBox styleClass="stat-card" spacing="8">
+        <Label text="Monthly Profit - Sell price minus Buy price (stock not counted)" styleClass="stat-card-label"/>
+        <BarChart fx:id="monthlyProfitChart" prefHeight="280" categoryGap="60" animated="false">
+            <xAxis><CategoryAxis label="Month"/></xAxis>
+            <yAxis><NumberAxis label="Profit (Tk)"/></yAxis>
+        </BarChart>
+    </VBox>
 
 </VBox>
 </ScrollPane>

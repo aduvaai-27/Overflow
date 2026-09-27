@@ -50,6 +50,13 @@ public class CapitalController {
         refresh();
     }
 
+    /**
+     * Lets the user add (or withdraw, with a negative number) capital
+     * manually. Both a source (where the money came from/went to, e.g.
+     * "Bank Loan") and a reason (the specific detail, e.g. "Working capital
+     * top-up") are required and kept in separate columns, since this is not
+     * sales revenue - it's the user's own money moving in or out.
+     */
     @FXML
     private void handleAddCapital() {
         Dialog<ButtonType> dialog = new Dialog<>();

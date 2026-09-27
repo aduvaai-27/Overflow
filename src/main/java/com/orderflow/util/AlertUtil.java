@@ -6,6 +6,7 @@ import javafx.scene.control.ButtonType;
 
 import java.util.Optional;
 
+/** Small wrapper so controllers don't repeat the same 4 lines everywhere. */
 public class AlertUtil {
 
     private AlertUtil() { }

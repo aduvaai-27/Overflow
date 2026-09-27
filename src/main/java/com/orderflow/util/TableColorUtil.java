@@ -5,10 +5,12 @@ import javafx.scene.control.TableColumn;
 
 import java.util.function.Function;
 
+/** Small helper to give status/phase/amount columns a bit of color instead of plain black text everywhere. */
 public class TableColorUtil {
 
     private TableColorUtil() { }
 
+    /** Colors a text column based on its own value (e.g. order status, payment status, stock status). */
     public static <T> void colorizeText(TableColumn<T, String> column, Function<String, String> colorForValue) {
         column.setCellFactory(col -> new TableCell<>() {
             @Override
@@ -26,6 +28,7 @@ public class TableColorUtil {
         });
     }
 
+    /** Colors a numeric column green when >= 0 and red when negative (e.g. a capital ledger amount). */
     public static <T> void colorizeSignedNumber(TableColumn<T, Double> column, String positiveColor, String negativeColor) {
         column.setCellFactory(col -> new TableCell<>() {
             @Override

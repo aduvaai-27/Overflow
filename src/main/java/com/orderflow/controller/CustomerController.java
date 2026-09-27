@@ -61,6 +61,7 @@ public class CustomerController {
             if (newVal != null) populateForm(newVal);
         });
 
+        // Click a customer's name/row to see their purchase history
         customerTable.setRowFactory(tv -> {
             javafx.scene.control.TableRow<Customer> row = new javafx.scene.control.TableRow<>();
             row.setOnMouseClicked(event -> {
@@ -162,6 +163,7 @@ public class CustomerController {
         showHistory(c);
     }
 
+    /** Shows what, when and how this customer has bought - as a stack of small receipt-style cards, one per order. */
     private void showHistory(Customer customer) {
         List<Order> orders = orderDAO.findByCustomerId(customer.getId());
 
@@ -194,6 +196,7 @@ public class CustomerController {
         alert.showAndWait();
     }
 
+    /** One order rendered like a small printed receipt/bill card. */
     private VBox buildReceiptCard(Order order) {
         List<OrderItem> items = orderDAO.findItemsByOrderId(order.getId());
 
@@ -202,12 +205,14 @@ public class CustomerController {
         card.setStyle("-fx-background-color: white; -fx-border-color: #dcdfe3; -fx-border-radius: 6; " +
                 "-fx-background-radius: 6; -fx-font-family: 'Consolas', 'Courier New', monospace;");
 
+        // Header row: order number (left) and date (right)
         Label orderNoLabel = new Label("Order #" + order.getId());
         orderNoLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
         Label dateLabel = new Label(DateUtil.formatForDisplay(order.getOrderDate()));
         dateLabel.setStyle("-fx-text-fill: #7f8c8d; -fx-font-size: 11px;");
         HBox header = row(orderNoLabel, dateLabel);
 
+        // Payment / status line
         Label metaLabel = new Label(order.getPaymentMethod() + " (" + order.getPaymentStatus() + ")  \u2022  "
                 + order.getOrderStatus());
         metaLabel.setStyle("-fx-text-fill: #7f8c8d; -fx-font-size: 11px;");
@@ -233,6 +238,7 @@ public class CustomerController {
         return card;
     }
 
+    /** A left label and a right label on the same line, with a flexible gap between them. */
     private HBox row(Label left, Label right) {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);

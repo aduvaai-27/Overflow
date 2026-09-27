@@ -3,14 +3,15 @@ package com.orderflow.model;
 import java.util.HashSet;
 import java.util.Set;
 
+/** Represents a product that OrderFlow sells and keeps stock of. */
 public class Product {
     private int id;
     private String name;
     private String sku;
     private int categoryId;
     private String categoryName;
-    private Set<Integer> supplierIds = new HashSet<>();
-    private String supplierNamesDisplay;
+    private Set<Integer> supplierIds = new HashSet<>();  // derived from the product's category - which companies supply it
+    private String supplierNamesDisplay;                 // derived, comma-separated, for display
     private double purchasePrice;
     private double sellingPrice;
     private int stockQty;

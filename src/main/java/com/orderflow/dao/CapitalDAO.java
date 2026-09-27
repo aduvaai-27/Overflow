@@ -8,6 +8,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Manages the capital ledger: the business's own money, kept separate from
+ * sales revenue. Sale profit is added automatically (see OrderDAO), paying
+ * a supplier on a completed restock request is subtracted automatically
+ * (see SupplierRequestDAO), and the user can also add capital manually
+ * from the Capital page.
+ */
 public class CapitalDAO {
 
     public double getCurrentCapital() {
@@ -40,10 +47,12 @@ public class CapitalDAO {
         return list;
     }
 
+    /** Records a capital movement. Use a positive amount to add capital, negative to spend it. */
     public boolean addEntry(double amount, String source, String reason) {
         return addEntry(DatabaseConnection.getConnection(), amount, source, reason);
     }
 
+    /** Same as addEntry, but participates in an existing transaction/connection. */
     public boolean addEntry(Connection conn, double amount, String source, String reason) {
         String sql = "INSERT INTO capital_transactions(amount, source, reason, transaction_date) VALUES (?,?,?,?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {

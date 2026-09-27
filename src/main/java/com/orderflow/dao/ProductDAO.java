@@ -40,6 +40,7 @@ public class ProductDAO {
         return list;
     }
 
+    /** Used by the background StockAlertMonitor thread (multithreading topic). */
     public int countLowStock() {
         String sql = "SELECT COUNT(*) AS cnt FROM products WHERE active = 1 AND stock_qty <= min_stock";
         try (Statement st = DatabaseConnection.getConnection().createStatement();
@@ -89,6 +90,7 @@ public class ProductDAO {
         }
     }
 
+    /** Business rule from the spec: deactivate rather than hard-delete products with order history. */
     public boolean deactivate(int id) {
         String sql = "UPDATE products SET active = 0 WHERE id = ?";
         try (PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement(sql)) {
@@ -100,6 +102,10 @@ public class ProductDAO {
         }
     }
 
+    /**
+     * Adjusts stock by deltaQty (positive = add stock, negative = remove stock)
+     * and writes an inventory_transactions row so the change is traceable.
+     */
     public boolean adjustStock(int productId, int deltaQty, String reason) {
         Connection conn = DatabaseConnection.getConnection();
         String updateSql = "UPDATE products SET stock_qty = stock_qty + ? WHERE id = ?";

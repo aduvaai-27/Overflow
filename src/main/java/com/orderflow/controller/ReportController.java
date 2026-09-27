@@ -2,11 +2,15 @@ package com.orderflow.controller;
 
 import com.orderflow.dao.OrderDAO;
 import com.orderflow.model.Order;
+import com.orderflow.model.ProductSalesRow;
 import com.orderflow.util.AlertUtil;
+import com.orderflow.util.ChartUtil;
 import com.orderflow.util.DateUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -14,9 +18,13 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ReportController {
+
+    private static final int TOP_N = 6;
 
     @FXML private DatePicker fromDatePicker;
     @FXML private DatePicker toDatePicker;
@@ -32,6 +40,9 @@ public class ReportController {
     @FXML private TableColumn<Order, Double> totalColumn;
     @FXML private TableColumn<Order, String> statusColumn;
 
+    @FXML private BarChart<String, Number> topSellingChart;   // highest selling product (to customers), by quantity
+    @FXML private BarChart<String, Number> topRevenueChart;   // highest revenue generating product
+
     private final OrderDAO orderDAO = new OrderDAO();
     private final ObservableList<Order> reportList = FXCollections.observableArrayList();
 
@@ -46,6 +57,10 @@ public class ReportController {
 
         reportTable.setItems(reportList);
 
+        topSellingChart.setLegendVisible(false);
+        topRevenueChart.setLegendVisible(false);
+
+        // Default range: last 30 days
         toDatePicker.setValue(LocalDate.now());
         fromDatePicker.setValue(LocalDate.now().minusDays(30));
 
@@ -77,5 +92,39 @@ public class ReportController {
         orderCountLabel.setText(String.valueOf(orders.size()));
         revenueLabel.setText(String.format("%.2f", revenue));
         avgOrderLabel.setText(orders.isEmpty() ? "0.00" : String.format("%.2f", revenue / orders.size()));
+
+        List<ProductSalesRow> sales = orderDAO.productSalesBetween(from.toString(), to.toString());
+        renderTopSellingChart(sales);
+        renderTopRevenueChart(sales);
+    }
+
+    private void renderTopSellingChart(List<ProductSalesRow> sales) {
+        List<ProductSalesRow> topByQty = sales.stream()
+                .sorted(Comparator.comparingInt(ProductSalesRow::getQuantitySold).reversed())
+                .limit(TOP_N)
+                .collect(Collectors.toList());
+
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Units sold");
+        for (ProductSalesRow row : topByQty) {
+            series.getData().add(new XYChart.Data<>(row.getProductName(), row.getQuantitySold()));
+        }
+        topSellingChart.getData().setAll(series);
+        ChartUtil.colorizeCategorical(series);
+    }
+
+    private void renderTopRevenueChart(List<ProductSalesRow> sales) {
+        List<ProductSalesRow> topByRevenue = sales.stream()
+                .sorted(Comparator.comparingDouble(ProductSalesRow::getRevenue).reversed())
+                .limit(TOP_N)
+                .collect(Collectors.toList());
+
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Revenue (Tk)");
+        for (ProductSalesRow row : topByRevenue) {
+            series.getData().add(new XYChart.Data<>(row.getProductName(), row.getRevenue()));
+        }
+        topRevenueChart.getData().setAll(series);
+        ChartUtil.colorizeCategorical(series);
     }
 }

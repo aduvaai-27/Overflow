@@ -1,5 +1,6 @@
 package com.orderflow.model;
 
+/** One line item inside an order (a product + quantity). */
 public class OrderItem {
     private int id;
     private int orderId;

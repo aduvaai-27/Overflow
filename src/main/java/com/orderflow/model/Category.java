@@ -1,9 +1,10 @@
 package com.orderflow.model;
 
+/** Represents a product category, e.g. Electronics, Clothing. */
 public class Category {
     private int id;
     private String name;
-    private String suppliersDisplay;
+    private String suppliersDisplay; // comma-separated supplier names, for display only (read-only, derived)
 
     public Category() {}
 

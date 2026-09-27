@@ -20,8 +20,8 @@ import java.util.List;
 
 public class NewOrderController {
 
-    private static final double TAX_RATE = 0.05;
-    private static final double DELIVERY_CHARGE = 60;
+    private static final double TAX_RATE = 0.05;      // fixed 5% tax, kept simple for a student project
+    private static final double DELIVERY_CHARGE = 60;  // flat delivery charge
 
     @FXML private ComboBox<Customer> customerCombo;
     @FXML private ComboBox<Product> productCombo;
@@ -79,6 +79,7 @@ public class NewOrderController {
             return;
         }
 
+        // If the product is already in the cart, just increase its quantity
         for (OrderItem item : cart) {
             if (item.getProductId() == product.getId()) {
                 int newQty = item.getQuantity() + qty;
@@ -145,7 +146,7 @@ public class NewOrderController {
         order.setDeliveryCharge(delivery);
         order.setTotal(total);
         order.setPaymentMethod(paymentMethod);
-
+        // COD stays "Pending" until delivery is completed; other methods are marked Paid immediately
         order.setPaymentStatus(paymentMethod.equals("COD") ? "Pending" : "Paid");
         order.setOrderStatus("Confirmed");
 

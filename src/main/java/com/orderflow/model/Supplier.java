@@ -1,12 +1,13 @@
 package com.orderflow.model;
 
+/** Represents a supplier/company that products are purchased (restocked) from. */
 public class Supplier {
     private int id;
     private String name;
     private String phone;
     private String email;
     private String address;
-    private String categoriesDisplay;
+    private String categoriesDisplay; // comma-separated category names this supplier provides, for display only
 
     public Supplier() {}
 

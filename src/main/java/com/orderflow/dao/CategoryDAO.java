@@ -7,6 +7,12 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Categories no longer pick a single supplier directly - which suppliers
+ * provide a category is set from the Suppliers page (a supplier can supply
+ * more than one category, and a category can be supplied by more than one
+ * company). This DAO only reads that relationship back for display.
+ */
 public class CategoryDAO {
 
     private static final String SELECT_BASE =

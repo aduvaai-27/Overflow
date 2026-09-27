@@ -1,11 +1,12 @@
 package com.orderflow.model;
 
+/** Represents a row in the users table (login + role based access). */
 public class User {
     private int id;
     private String username;
     private String passwordHash;
     private String fullName;
-    private String role;
+    private String role; // Admin / Staff
 
     public User() {}
 

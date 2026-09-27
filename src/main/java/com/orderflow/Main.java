@@ -9,6 +9,17 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+/**
+ * Application entry point.
+ *
+ * Note on "C and Java Compilation": unlike a C program, which a compiler
+ * (e.g. gcc) turns directly into machine code for one specific operating
+ * system, this Java program is compiled by javac into platform-independent
+ * .class bytecode. That bytecode is then executed by the Java Virtual
+ * Machine (JVM), which is why the same OrderFlow.jar can run on Windows,
+ * Linux or macOS without being recompiled. See README.md for the full
+ * compile/run commands used for this project.
+ */
 public class Main extends Application {
 
     private static Stage primaryStage;
@@ -17,11 +28,14 @@ public class Main extends Application {
     public void start(Stage stage) throws IOException {
         primaryStage = stage;
 
+        // Touch the database once at startup so the schema/seed data
+        // is created before the login screen even appears.
         DatabaseConnection.getConnection();
 
         switchScene("/com/orderflow/fxml/Login.fxml", "OrderFlow - Login");
     }
 
+    /** Lets controllers navigate between full-screen views (Login -> Main app). */
     public static void switchScene(String fxmlPath, String title) throws IOException {
         FXMLLoader loader = new FXMLLoader(Main.class.getResource(fxmlPath));
         Parent root = loader.load();

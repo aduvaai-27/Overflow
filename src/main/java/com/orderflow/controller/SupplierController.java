@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 public class SupplierController {
 
+    // ---- Supplier form/table ----
     @FXML private TextField nameField;
     @FXML private TextField phoneField;
     @FXML private TextField emailField;
@@ -38,12 +39,14 @@ public class SupplierController {
     @FXML private TableColumn<Supplier, String> addressColumn;
     @FXML private TableColumn<Supplier, String> categoriesColumn;
 
+    // ---- Restock request form ----
     @FXML private ComboBox<Supplier> supplierCombo;
     @FXML private ComboBox<Product> productCombo;
     @FXML private Label productHintLabel;
     @FXML private Spinner<Integer> qtySpinner;
     @FXML private TextField unitCostField;
 
+    // ---- Requests table ----
     @FXML private TableView<SupplierRequest> requestTable;
     @FXML private TableColumn<SupplierRequest, Integer> reqIdColumn;
     @FXML private TableColumn<SupplierRequest, String> reqSupplierColumn;
@@ -91,7 +94,7 @@ public class SupplierController {
         TableColorUtil.colorizeText(reqPhaseColumn, value -> switch (value) {
             case "Shipped" -> "#3498db";
             case "Completed" -> "#2ecc71";
-            default -> "#e67e22";
+            default -> "#e67e22"; // Requested
         });
         reqDateColumn.setCellValueFactory(cellData ->
                 new javafx.beans.property.SimpleStringProperty(DateUtil.formatForDisplay(cellData.getValue().getRequestDate())));
@@ -99,8 +102,11 @@ public class SupplierController {
 
         qtySpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100000, 1));
 
+        // Picking a supplier narrows the product list down to only the
+        // products whose category is actually supplied by that company.
         supplierCombo.valueProperty().addListener((obs, oldVal, newVal) -> filterProductsBySupplier(newVal));
 
+        // Default the unit cost field to the selected product's own purchase price
         productCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
                 unitCostField.setText(String.format("%.2f", newVal.getPurchasePrice()));
@@ -119,6 +125,7 @@ public class SupplierController {
         requestList.setAll(requestDAO.findAll());
     }
 
+    /** Builds one checkbox per existing category, for the "which categories does this company supply" form field. */
     private void rebuildCategoryCheckboxes() {
         Set<Integer> previouslyChecked = categoryCheckboxes.stream()
                 .filter(CheckBox::isSelected)
@@ -171,6 +178,8 @@ public class SupplierController {
             cb.setSelected(linkedCategoryIds.contains((Integer) cb.getUserData()));
         }
     }
+
+    // ---------- Supplier CRUD ----------
 
     @FXML
     private void handleAddSupplier() {
@@ -231,6 +240,8 @@ public class SupplierController {
         }
         return new Supplier(id, name, phoneField.getText().trim(), emailField.getText().trim(), addressField.getText().trim());
     }
+
+    // ---------- Restock requests ----------
 
     @FXML
     private void handleSendRequest() {

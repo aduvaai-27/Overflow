@@ -8,6 +8,14 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Manages restock requests sent to suppliers. A request moves through
+ * phases: Requested -> Shipped -> Completed. Only when it reaches
+ * Completed does the app automatically:
+ *   1) increase the product's stock by the requested quantity, and
+ *   2) pay the supplier out of capital (quantity x unit cost), i.e.
+ *      decrease capital and record the purchase in the ledger.
+ */
 public class SupplierRequestDAO {
 
     private static final List<String> PHASE_FLOW = List.of("Requested", "Shipped", "Completed");
@@ -34,6 +42,7 @@ public class SupplierRequestDAO {
         return list;
     }
 
+    /** Creates a new restock request in the "Requested" phase. */
     public boolean createRequest(int supplierId, int productId, int quantity, double unitCost) {
         String sql = "INSERT INTO supplier_requests(supplier_id, product_id, quantity, unit_cost, phase, request_date) " +
                      "VALUES (?,?,?,?,'Requested',?)";
@@ -50,10 +59,15 @@ public class SupplierRequestDAO {
         }
     }
 
+    /**
+     * Advances a request to its next phase. When the request reaches
+     * "Completed", stock is increased and the supplier bill is paid out
+     * of capital, all inside one transaction.
+     */
     public boolean advancePhase(SupplierRequest request) {
         int currentIndex = PHASE_FLOW.indexOf(request.getPhase());
         if (currentIndex == -1 || currentIndex == PHASE_FLOW.size() - 1) {
-            return false;
+            return false; // already completed, or unknown phase
         }
         String nextPhase = PHASE_FLOW.get(currentIndex + 1);
 
@@ -76,7 +90,7 @@ public class SupplierRequestDAO {
             }
 
             if (nextPhase.equals("Completed")) {
-
+                // 1) Increase stock for the received product
                 try (PreparedStatement psStock = conn.prepareStatement(
                         "UPDATE products SET stock_qty = stock_qty + ? WHERE id = ?")) {
                     psStock.setInt(1, request.getQuantity());
@@ -92,6 +106,7 @@ public class SupplierRequestDAO {
                     psTxn.executeUpdate();
                 }
 
+                // 2) Pay the supplier out of capital (COD-style, paid on completion)
                 double cost = request.getQuantity() * request.getUnitCost();
                 String reason = "Purchased " + request.getQuantity() + " x " + request.getProductName()
                         + " from " + request.getSupplierName() + " (Request #" + request.getId() + ")";

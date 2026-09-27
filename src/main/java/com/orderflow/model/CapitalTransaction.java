@@ -1,5 +1,14 @@
 package com.orderflow.model;
 
+/**
+ * One entry in the capital ledger. Capital is the business's own money and
+ * is tracked separately from sales revenue: a positive amount increases
+ * capital (manual top-up, or automatic sale profit); a negative amount
+ * decreases it (e.g. automatically paying a supplier on a completed
+ * restock request). "Source" is where the money came from/went to (e.g.
+ * "Sales Profit", "Bank Loan"); "Reason" is the specific detail of why
+ * (e.g. "Profit from Order #4", "Working capital top-up").
+ */
 public class CapitalTransaction {
     private int id;
     private double amount;

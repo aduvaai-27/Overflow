@@ -29,6 +29,7 @@ public class SupplierDAO {
         return list;
     }
 
+    /** Which categories (by id) this supplier is currently linked to. */
     public Set<Integer> findCategoryIdsForSupplier(int supplierId) {
         Set<Integer> ids = new HashSet<>();
         String sql = "SELECT category_id FROM category_suppliers WHERE supplier_id = ?";
@@ -43,6 +44,7 @@ public class SupplierDAO {
         return ids;
     }
 
+    /** Adds a new supplier and links it to the given categories, in one transaction. */
     public boolean add(Supplier s, Set<Integer> categoryIds) {
         Connection conn = DatabaseConnection.getConnection();
         try {
@@ -72,6 +74,7 @@ public class SupplierDAO {
         }
     }
 
+    /** Updates a supplier's details and replaces its category links, in one transaction. */
     public boolean update(Supplier s, Set<Integer> categoryIds) {
         Connection conn = DatabaseConnection.getConnection();
         try {

@@ -83,6 +83,12 @@ public class ProductController {
         productList.setAll(productDAO.findAll());
     }
 
+    /**
+     * A product doesn't pick its own supplier - it's determined by which
+     * companies supply its category (set on the Suppliers page, since a
+     * category can have more than one supplier), so this just shows what
+     * that is as the user picks a category.
+     */
     private void updateSupplierHint(Category category) {
         if (category == null) {
             supplierHintLabel.setText("(select a category)");
@@ -185,6 +191,7 @@ public class ProductController {
         refresh();
     }
 
+    /** Reads the form fields, validates them, and builds a Product object. Returns null if invalid. */
     private Product buildProductFromForm(Integer existingId) {
         String name = nameField.getText().trim();
         String sku = skuField.getText().trim();

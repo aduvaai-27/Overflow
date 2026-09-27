@@ -1,5 +1,6 @@
 package com.orderflow.model;
 
+/** Represents a customer who places orders. */
 public class Customer {
     private int id;
     private String name;
