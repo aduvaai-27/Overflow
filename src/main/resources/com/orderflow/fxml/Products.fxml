@@ -47,8 +47,8 @@
         <TextField fx:id="minStockField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
         <Label text="Supplier" GridPane.rowIndex="3" GridPane.columnIndex="2"/>
-        <Label fx:id="supplierHintLabel" text="(select a category)" GridPane.rowIndex="3" GridPane.columnIndex="3"
-               style="-fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+        <ComboBox fx:id="supplierCombo" GridPane.rowIndex="3" GridPane.columnIndex="3" maxWidth="Infinity"
+                  promptText="Which company owns this listing?"/>
 
         <HBox spacing="10" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="4">
             <Button text="Add Product" styleClass="button-primary" onAction="#handleAdd"/>

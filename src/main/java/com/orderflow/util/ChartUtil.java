@@ -5,23 +5,21 @@ import javafx.scene.chart.XYChart;
 
 import java.util.List;
 
-/** Small helper so every bar chart in the app doesn't end up as one flat, monotone orange block. */
+/** Small helper so every bar chart in the app doesn't end up as one flat, monotone block. */
 public class ChartUtil {
 
     private ChartUtil() { }
 
-    /** A varied, easy-to-tell-apart palette used across the app's charts. */
+    /** A varied, easy-to-tell-apart palette, tuned to sit with the app's indigo/slate identity instead of clashing against it. */
     private static final List<String> PALETTE = List.of(
-            "#3498db", // blue
-            "#e67e22", // orange
-            "#2ecc71", // green
-            "#9b59b6", // purple
-            "#e74c3c", // red
-            "#1abc9c", // teal
-            "#f1c40f", // yellow
-            "#e84393", // pink
-            "#34495e", // navy
-            "#16a085"  // dark teal
+            "#4f46e5", // indigo (brand)
+            "#0ea5e9", // sky blue
+            "#14b8a6", // teal
+            "#f59e0b", // amber
+            "#ec4899", // rose
+            "#8b5cf6", // violet
+            "#10b981", // emerald
+            "#64748b"  // slate gray
     );
 
     /** Colors each bar in the series differently, cycling through the palette. */

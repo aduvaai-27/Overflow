@@ -5,6 +5,8 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
@@ -12,7 +14,10 @@
            fx:controller="com.orderflow.controller.LoginController"
            styleClass="login-pane" prefWidth="900" prefHeight="600">
 
-    <VBox styleClass="login-card" maxWidth="340" maxHeight="330" spacing="12" alignment="CENTER">
+    <VBox styleClass="login-card" maxWidth="340" maxHeight="380" spacing="12" alignment="CENTER">
+        <ImageView fitWidth="72" fitHeight="72" styleClass="login-logo">
+            <Image url="@../images/logo.png"/>
+        </ImageView>
         <Label text="OrderFlow" styleClass="login-title"/>
         <Label text="E-Commerce Order &amp; Inventory Management" styleClass="login-subtitle" wrapText="true"/>
 

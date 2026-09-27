@@ -1,17 +1,20 @@
 package com.orderflow.model;
 
-import java.util.HashSet;
-import java.util.Set;
-
-/** Represents a product that OrderFlow sells and keeps stock of. */
+/**
+ * Represents a product that OrderFlow sells and keeps stock of.
+ * Each product row is owned by exactly one supplier - its own listing, with
+ * its own stock and price. Two companies selling the same-named item (e.g.
+ * both selling a "Cotton T-Shirt") are two separate Product rows that just
+ * happen to share a name.
+ */
 public class Product {
     private int id;
     private String name;
     private String sku;
     private int categoryId;
     private String categoryName;
-    private Set<Integer> supplierIds = new HashSet<>();  // derived from the product's category - which companies supply it
-    private String supplierNamesDisplay;                 // derived, comma-separated, for display
+    private Integer supplierId;      // the one company this exact listing belongs to (nullable until assigned)
+    private String supplierName;     // derived, for display
     private double purchasePrice;
     private double sellingPrice;
     private int stockQty;
@@ -51,11 +54,11 @@ public class Product {
     public String getCategoryName() { return categoryName; }
     public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
 
-    public Set<Integer> getSupplierIds() { return supplierIds; }
-    public void setSupplierIds(Set<Integer> supplierIds) { this.supplierIds = supplierIds; }
+    public Integer getSupplierId() { return supplierId; }
+    public void setSupplierId(Integer supplierId) { this.supplierId = supplierId; }
 
-    public String getSupplierNamesDisplay() { return supplierNamesDisplay; }
-    public void setSupplierNamesDisplay(String supplierNamesDisplay) { this.supplierNamesDisplay = supplierNamesDisplay; }
+    public String getSupplierName() { return supplierName; }
+    public void setSupplierName(String supplierName) { this.supplierName = supplierName; }
 
     public double getPurchasePrice() { return purchasePrice; }
     public void setPurchasePrice(double purchasePrice) { this.purchasePrice = purchasePrice; }

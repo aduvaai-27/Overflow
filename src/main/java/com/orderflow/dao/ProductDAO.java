@@ -10,12 +10,10 @@ import java.util.List;
 public class ProductDAO {
 
     private static final String SELECT_BASE =
-            "SELECT p.*, c.name AS category_name, " +
-            "(SELECT GROUP_CONCAT(s.name, ', ') FROM category_suppliers cs " +
-            " JOIN suppliers s ON cs.supplier_id = s.id WHERE cs.category_id = c.id) AS supplier_names, " +
-            "(SELECT GROUP_CONCAT(cs.supplier_id) FROM category_suppliers cs WHERE cs.category_id = c.id) AS supplier_ids " +
+            "SELECT p.*, c.name AS category_name, s.name AS supplier_name " +
             "FROM products p " +
-            "LEFT JOIN categories c ON p.category_id = c.id ";
+            "LEFT JOIN categories c ON p.category_id = c.id " +
+            "LEFT JOIN suppliers s ON p.supplier_id = s.id ";
 
     public List<Product> findAllActive() {
         return query(SELECT_BASE + "WHERE p.active = 1 ORDER BY p.name");
@@ -23,6 +21,21 @@ public class ProductDAO {
 
     public List<Product> findAll() {
         return query(SELECT_BASE + "ORDER BY p.name");
+    }
+
+    /** Only the products owned by this exact supplier - what a "select supplier, then product" flow should offer. */
+    public List<Product> findAllActiveBySupplier(int supplierId) {
+        List<Product> list = new ArrayList<>();
+        String sql = SELECT_BASE + "WHERE p.active = 1 AND p.supplier_id = ? ORDER BY p.name";
+        try (PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement(sql)) {
+            ps.setInt(1, supplierId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(map(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 
     public List<Product> search(String keyword) {
@@ -53,16 +66,17 @@ public class ProductDAO {
     }
 
     public boolean add(Product p) {
-        String sql = "INSERT INTO products(name, sku, category_id, purchase_price, selling_price, stock_qty, min_stock, active) " +
-                     "VALUES (?,?,?,?,?,?,?,1)";
+        String sql = "INSERT INTO products(name, sku, category_id, supplier_id, purchase_price, selling_price, stock_qty, min_stock, active) " +
+                     "VALUES (?,?,?,?,?,?,?,?,1)";
         try (PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement(sql)) {
             ps.setString(1, p.getName());
             ps.setString(2, p.getSku());
             ps.setInt(3, p.getCategoryId());
-            ps.setDouble(4, p.getPurchasePrice());
-            ps.setDouble(5, p.getSellingPrice());
-            ps.setInt(6, p.getStockQty());
-            ps.setInt(7, p.getMinStock());
+            setNullableInt(ps, 4, p.getSupplierId());
+            ps.setDouble(5, p.getPurchasePrice());
+            ps.setDouble(6, p.getSellingPrice());
+            ps.setInt(7, p.getStockQty());
+            ps.setInt(8, p.getMinStock());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -71,22 +85,31 @@ public class ProductDAO {
     }
 
     public boolean update(Product p) {
-        String sql = "UPDATE products SET name=?, sku=?, category_id=?, purchase_price=?, selling_price=?, " +
+        String sql = "UPDATE products SET name=?, sku=?, category_id=?, supplier_id=?, purchase_price=?, selling_price=?, " +
                      "stock_qty=?, min_stock=?, active=? WHERE id=?";
         try (PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement(sql)) {
             ps.setString(1, p.getName());
             ps.setString(2, p.getSku());
             ps.setInt(3, p.getCategoryId());
-            ps.setDouble(4, p.getPurchasePrice());
-            ps.setDouble(5, p.getSellingPrice());
-            ps.setInt(6, p.getStockQty());
-            ps.setInt(7, p.getMinStock());
-            ps.setInt(8, p.isActive() ? 1 : 0);
-            ps.setInt(9, p.getId());
+            setNullableInt(ps, 4, p.getSupplierId());
+            ps.setDouble(5, p.getPurchasePrice());
+            ps.setDouble(6, p.getSellingPrice());
+            ps.setInt(7, p.getStockQty());
+            ps.setInt(8, p.getMinStock());
+            ps.setInt(9, p.isActive() ? 1 : 0);
+            ps.setInt(10, p.getId());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    private void setNullableInt(PreparedStatement ps, int index, Integer value) throws SQLException {
+        if (value == null) {
+            ps.setNull(index, Types.INTEGER);
+        } else {
+            ps.setInt(index, value);
         }
     }
 
@@ -170,15 +193,9 @@ public class ProductDAO {
                 rs.getInt("min_stock"),
                 rs.getInt("active") == 1
         );
-        String supplierIdsRaw = rs.getString("supplier_ids");
-        java.util.Set<Integer> supplierIds = new java.util.HashSet<>();
-        if (supplierIdsRaw != null && !supplierIdsRaw.isBlank()) {
-            for (String idStr : supplierIdsRaw.split(",")) {
-                supplierIds.add(Integer.parseInt(idStr.trim()));
-            }
-        }
-        p.setSupplierIds(supplierIds);
-        p.setSupplierNamesDisplay(rs.getString("supplier_names"));
+        int supplierId = rs.getInt("supplier_id");
+        p.setSupplierId(rs.wasNull() ? null : supplierId);
+        p.setSupplierName(rs.getString("supplier_name"));
         return p;
     }
 }

@@ -44,14 +44,14 @@
     <HBox spacing="15">
         <VBox styleClass="stat-card" spacing="6" HBox.hgrow="ALWAYS">
             <Label text="Highest Selling Product (by quantity bought)" styleClass="stat-card-label"/>
-            <BarChart fx:id="topSellingChart" prefHeight="260" categoryGap="40" animated="false">
+            <BarChart fx:id="topSellingChart" prefHeight="260" categoryGap="65" barGap="0" animated="false">
                 <xAxis><CategoryAxis label="Product"/></xAxis>
                 <yAxis><NumberAxis label="Units sold"/></yAxis>
             </BarChart>
         </VBox>
         <VBox styleClass="stat-card" spacing="6" HBox.hgrow="ALWAYS">
             <Label text="Highest Revenue Generating Product" styleClass="stat-card-label"/>
-            <BarChart fx:id="topRevenueChart" prefHeight="260" categoryGap="40" animated="false">
+            <BarChart fx:id="topRevenueChart" prefHeight="260" categoryGap="65" barGap="0" animated="false">
                 <xAxis><CategoryAxis label="Product"/></xAxis>
                 <yAxis><NumberAxis label="Revenue (Tk)"/></yAxis>
             </BarChart>

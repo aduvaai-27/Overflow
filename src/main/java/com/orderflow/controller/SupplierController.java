@@ -92,9 +92,9 @@ public class SupplierController {
         reqTotalCostColumn.setCellValueFactory(new PropertyValueFactory<>("totalCost"));
         reqPhaseColumn.setCellValueFactory(new PropertyValueFactory<>("phase"));
         TableColorUtil.colorizeText(reqPhaseColumn, value -> switch (value) {
-            case "Shipped" -> "#3498db";
-            case "Completed" -> "#2ecc71";
-            default -> "#e67e22"; // Requested
+            case "Shipped" -> "#d97706";
+            case "Completed" -> "#16a34a";
+            default -> "#2563eb"; // Requested
         });
         reqDateColumn.setCellValueFactory(cellData ->
                 new javafx.beans.property.SimpleStringProperty(DateUtil.formatForDisplay(cellData.getValue().getRequestDate())));
@@ -158,12 +158,12 @@ public class SupplierController {
             return;
         }
         List<Product> filtered = allActiveProducts.stream()
-                .filter(p -> p.getSupplierIds().contains(supplier.getId()))
+                .filter(p -> p.getSupplierId() != null && p.getSupplierId() == supplier.getId())
                 .collect(Collectors.toList());
         productCombo.setItems(FXCollections.observableArrayList(filtered));
         productHintLabel.setText(filtered.isEmpty()
-                ? "No products under " + supplier.getName() + "'s categories yet."
-                : filtered.size() + " product(s) supplied by " + supplier.getName());
+                ? "No products owned by " + supplier.getName() + " yet."
+                : filtered.size() + " product(s) owned by " + supplier.getName());
     }
 
     private void populateForm(Supplier s) {

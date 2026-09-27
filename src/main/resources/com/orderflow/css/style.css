@@ -1,24 +1,40 @@
+/* ==========================================================
+   OrderFlow palette v2 - "Indigo Ledger": a cool, modern identity,
+   swapped in wholesale from the original warm navy/clay scheme:
+     - ink      #101433  deep indigo-black (sidebar, headers, text)
+     - paper    #eef1f8  cool, light background (never warm cream)
+     - indigo   #4f46e5  brand accent - primary actions, active nav, logo
+     - red      #dc2626  reserved ONLY for real alerts/negative meaning
+   Cool slate-blue neutrals (grays with a hint of indigo) tie it together.
+   Chart series use a wider, distinct set (see .chart-bar / ChartUtil.java)
+   so bars are never confused with the brand accent alone.
+   ========================================================== */
+
 .root {
     -fx-font-family: "Segoe UI", Arial, sans-serif;
-    -fx-background-color: #f7f8fa;
+    -fx-background-color: #eef1f8;
     -fx-font-size: 13px;
 }
 
 .login-pane {
-    -fx-background-color: #1e293b;
+    -fx-background-color: #101433;
 }
 
 .login-card {
-    -fx-background-color: white;
+    -fx-background-color: #ffffff;
     -fx-background-radius: 6;
     -fx-padding: 32;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.20), 10, 0, 0, 3);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 14, 0, 0, 5);
+}
+
+.login-logo {
+    -fx-effect: dropshadow(gaussian, rgba(79,70,229,0.45), 10, 0, 0, 3);
 }
 
 .login-title {
-    -fx-font-size: 21px;
+    -fx-font-size: 22px;
     -fx-font-weight: bold;
-    -fx-text-fill: #1e293b;
+    -fx-text-fill: #101433;
 }
 
 .login-subtitle {
@@ -27,26 +43,29 @@
 }
 
 .sidebar {
-    -fx-background-color: #1e293b;
+    -fx-background-color: #101433;
     -fx-padding: 18 12 18 12;
     -fx-pref-width: 205;
 }
 
+.sidebar-logo-row {
+    -fx-padding: 0 0 4 4;
+}
+
 .sidebar-title {
-    -fx-text-fill: white;
+    -fx-text-fill: #eef1f8;
     -fx-font-size: 17px;
     -fx-font-weight: bold;
-    -fx-padding: 0 0 4 6;
 }
 
 .sidebar-subtitle {
-    -fx-text-fill: #94a3b8;
+    -fx-text-fill: #97a0c3;
     -fx-font-size: 10px;
     -fx-padding: 0 0 20 6;
 }
 
 .nav-section-label {
-    -fx-text-fill: #64748b;
+    -fx-text-fill: #7d87ab;
     -fx-font-size: 10px;
     -fx-font-weight: bold;
     -fx-padding: 14 0 4 6;
@@ -54,83 +73,88 @@
 
 .nav-button {
     -fx-background-color: transparent;
-    -fx-text-fill: #cbd5e1;
+    -fx-text-fill: #ced2ef;
     -fx-alignment: CENTER_LEFT;
     -fx-padding: 9 10 9 10;
     -fx-font-size: 13px;
     -fx-cursor: hand;
-    -fx-background-radius: 6;
+    -fx-background-radius: 4;
 }
 
 .nav-button:hover {
-    -fx-background-color: #334155;
+    -fx-background-color: #1f2555;
 }
 
 .nav-button-active {
-    -fx-background-color: #2563eb;
-    -fx-text-fill: white;
+    -fx-background-color: #4f46e5;
+    -fx-text-fill: #101433;
     -fx-font-weight: bold;
 }
 
 .logout-button {
-    -fx-background-color: #f1f5f9;
-    -fx-text-fill: #334155;
+    -fx-background-color: #191d4a;
+    -fx-text-fill: #eef1f8;
     -fx-alignment: CENTER;
     -fx-padding: 7 16 7 16;
     -fx-cursor: hand;
-    -fx-background-radius: 6;
-    -fx-border-color: #e2e8f0;
+    -fx-background-radius: 4;
+    -fx-border-color: #4f46e5;
     -fx-border-width: 1;
-    -fx-border-radius: 6;
+    -fx-border-radius: 4;
 }
 
 .logout-button:hover {
-    -fx-background-color: #e2e8f0;
+    -fx-background-color: #4f46e5;
+    -fx-text-fill: #101433;
+    -fx-border-color: #4f46e5;
 }
 
 .top-bar {
-    -fx-background-color: white;
+    -fx-background-color: #ffffff;
     -fx-padding: 14 24 14 24;
-    -fx-border-color: transparent transparent #e5e7eb transparent;
-    -fx-border-width: 0 0 1 0;
+    -fx-border-color: transparent transparent #101433 transparent;
+    -fx-border-width: 0 0 2 0;
 }
 
 .top-bar-title {
     -fx-font-size: 16px;
     -fx-font-weight: bold;
-    -fx-text-fill: #1e293b;
+    -fx-text-fill: #101433;
 }
 
 .content-pane {
-    -fx-background-color: #f7f8fa;
+    -fx-background-color: #eef1f8;
     -fx-padding: 24;
 }
 
 .section-title {
     -fx-font-size: 17px;
     -fx-font-weight: bold;
-    -fx-text-fill: #1e293b;
+    -fx-text-fill: #101433;
 }
 
 .dashboard-group-label {
     -fx-font-size: 11px;
     -fx-font-weight: bold;
-    -fx-text-fill: #64748b;
+    -fx-text-fill: #4f46e5;
     -fx-padding: 6 0 0 2;
 }
 
 .stat-card {
-    -fx-background-color: white;
-    -fx-background-radius: 6;
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 4;
     -fx-padding: 16;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 5, 0, 0, 1);
+    -fx-border-color: #dbe0f0;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-effect: dropshadow(gaussian, rgba(16,20,51,0.08), 5, 0, 0, 1);
     -fx-min-width: 170;
 }
 
 .stat-card-value {
     -fx-font-size: 21px;
     -fx-font-weight: bold;
-    -fx-text-fill: #1e293b;
+    -fx-text-fill: #101433;
 }
 
 .stat-card-label {
@@ -143,57 +167,57 @@
 }
 
 .button-primary {
-    -fx-background-color: #2563eb;
-    -fx-text-fill: white;
+    -fx-background-color: #4f46e5;
+    -fx-text-fill: #ffffff;
     -fx-font-weight: bold;
-    -fx-background-radius: 6;
+    -fx-background-radius: 4;
     -fx-cursor: hand;
     -fx-padding: 8 18 8 18;
 }
 
 .button-primary:hover {
-    -fx-background-color: #1d4ed8;
+    -fx-background-color: #4338ca;
 }
 
 .button-secondary {
-    -fx-background-color: #f1f5f9;
-    -fx-text-fill: #334155;
-    -fx-background-radius: 6;
+    -fx-background-color: #e8eaf7;
+    -fx-text-fill: #101433;
+    -fx-background-radius: 4;
     -fx-cursor: hand;
     -fx-padding: 8 18 8 18;
-    -fx-border-color: #e2e8f0;
+    -fx-border-color: #cdd3ec;
     -fx-border-width: 1;
-    -fx-border-radius: 6;
+    -fx-border-radius: 4;
 }
 
 .button-secondary:hover {
-    -fx-background-color: #e2e8f0;
+    -fx-background-color: #d7dbf3;
 }
 
 .button-danger {
-    -fx-background-color: #dc2626;
-    -fx-text-fill: white;
-    -fx-background-radius: 6;
+    -fx-background-color: #101433;
+    -fx-text-fill: #ffffff;
+    -fx-background-radius: 4;
     -fx-cursor: hand;
     -fx-padding: 8 18 8 18;
 }
 
 .button-danger:hover {
-    -fx-background-color: #b91c1c;
+    -fx-background-color: #dc2626;
 }
 
 .table-view {
-    -fx-background-color: white;
-    -fx-background-radius: 6;
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 4;
 }
 
 .table-view .column-header-background {
-    -fx-background-color: #f1f5f9;
-    -fx-background-radius: 6 6 0 0;
+    -fx-background-color: #101433;
+    -fx-background-radius: 4 4 0 0;
 }
 
 .table-view .column-header-background .label {
-    -fx-text-fill: #1e293b;
+    -fx-text-fill: #eef1f8;
     -fx-font-weight: bold;
     -fx-font-size: 12px;
 }
@@ -206,4 +230,51 @@
 .error-label {
     -fx-text-fill: #dc2626;
     -fx-font-size: 12px;
+}
+
+.sidebar-credit {
+    -fx-text-fill: #7d87ab;
+    -fx-font-size: 9px;
+    -fx-padding: 10 0 0 6;
+}
+
+/* ----------------------------------------------------------
+   Charts (Dashboard / Reports bar charts). Individual bars get
+   their real fill color from ChartUtil.java at runtime; this
+   just re-themes everything around them (background, gridlines,
+   axes, legend) so the chart reads as part of the app instead
+   of JavaFX's default blue/orange Modena look. Bars are also
+   capped narrower via categoryGap/barGap/maxWidth in the FXML.
+   ---------------------------------------------------------- */
+.chart {
+    -fx-padding: 6;
+}
+
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.chart-vertical-grid-lines, .chart-horizontal-grid-lines {
+    -fx-stroke: #dbe0f0;
+}
+
+.chart-alternative-row-fill {
+    -fx-fill: transparent;
+    -fx-stroke: transparent;
+}
+
+.axis {
+    -fx-tick-label-fill: #64748b;
+}
+
+.axis-label {
+    -fx-text-fill: #101433;
+}
+
+.chart-legend {
+    -fx-background-color: transparent;
+}
+
+.default-color0.chart-bar {
+    -fx-bar-fill: #4f46e5;
 }

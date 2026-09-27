@@ -112,7 +112,7 @@ public class DashboardController implements Disposable {
             series.getData().add(new XYChart.Data<>(mp.getMonth(), mp.getProfit()));
         }
         monthlyProfitChart.getData().setAll(series);
-        ChartUtil.colorizeByValue(series, "#2ecc71", "#e74c3c"); // green = profit, red = loss
+        ChartUtil.colorizeByValue(series, "#16a34a", "#dc2626"); // green = profit, red = loss
     }
 
     @Override

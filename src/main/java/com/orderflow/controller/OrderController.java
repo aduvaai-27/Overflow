@@ -51,17 +51,17 @@ public class OrderController {
         paymentStatusColumn.setCellValueFactory(new PropertyValueFactory<>("paymentStatus"));
         orderStatusColumn.setCellValueFactory(new PropertyValueFactory<>("orderStatus"));
         TableColorUtil.colorizeText(paymentStatusColumn, value -> switch (value) {
-            case "Paid" -> "#2ecc71";
-            case "Refunded" -> "#e74c3c";
-            default -> "#e67e22"; // Pending
+            case "Paid" -> "#16a34a";
+            case "Refunded" -> "#dc2626";
+            default -> "#d97706"; // Pending
         });
         TableColorUtil.colorizeText(orderStatusColumn, value -> switch (value) {
-            case "Confirmed" -> "#3498db";
-            case "Shipped" -> "#e67e22";
-            case "Delivered" -> "#1abc9c";
-            case "Completed" -> "#2ecc71";
-            case "Cancelled" -> "#e74c3c";
-            default -> "#95a5a6"; // Pending
+            case "Confirmed" -> "#2563eb";
+            case "Shipped" -> "#d97706";
+            case "Delivered" -> "#0d9488";
+            case "Completed" -> "#16a34a";
+            case "Cancelled" -> "#dc2626";
+            default -> "#64748b"; // Pending
         });
 
         orderTable.setItems(orderList);

@@ -80,7 +80,7 @@
 
         <Label fx:id="productHintLabel" text="Choose a supplier to see only the products they provide."
                GridPane.rowIndex="1" GridPane.columnIndex="2" GridPane.columnSpan="2"
-               wrapText="true" style="-fx-font-size: 11px; -fx-text-fill: #7f8c8d;"/>
+               wrapText="true" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
 
         <Label text="Quantity" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
         <Spinner fx:id="qtySpinner" GridPane.rowIndex="2" GridPane.columnIndex="1" editable="true" prefWidth="120"/>

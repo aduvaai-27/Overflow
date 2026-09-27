@@ -3,6 +3,8 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -12,7 +14,12 @@
 
     <left>
         <VBox styleClass="sidebar" fx:id="sidebarBox" spacing="6">
-            <Label text="OrderFlow" styleClass="sidebar-title"/>
+            <HBox styleClass="sidebar-logo-row" spacing="8" alignment="CENTER_LEFT">
+                <ImageView fitWidth="28" fitHeight="28">
+                    <Image url="@../images/logo.png"/>
+                </ImageView>
+                <Label text="OrderFlow" styleClass="sidebar-title"/>
+            </HBox>
             <Label text="Order &amp; Inventory System" styleClass="sidebar-subtitle"/>
 
             <Label text="OVERVIEW" styleClass="nav-section-label"/>
@@ -32,6 +39,7 @@
             <Button fx:id="btnReports" text="📊  Reports" styleClass="nav-button" maxWidth="Infinity" onAction="#showReports"/>
 
             <VBox VBox.vgrow="ALWAYS"/>
+            <Label text="OrderFlow — built by Mohammad Adnan Shamim (2307112)" styleClass="sidebar-credit" wrapText="true"/>
         </VBox>
     </left>
 

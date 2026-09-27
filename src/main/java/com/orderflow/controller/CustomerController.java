@@ -172,7 +172,7 @@ public class CustomerController {
 
         if (orders.isEmpty()) {
             Label empty = new Label("This customer has not placed any orders yet.");
-            empty.setStyle("-fx-text-fill: #7f8c8d; -fx-padding: 20;");
+            empty.setStyle("-fx-text-fill: #64748b; -fx-padding: 20;");
             container.getChildren().add(empty);
         } else {
             for (Order o : orders) {
@@ -202,20 +202,20 @@ public class CustomerController {
 
         VBox card = new VBox(6);
         card.setPadding(new Insets(12));
-        card.setStyle("-fx-background-color: white; -fx-border-color: #dcdfe3; -fx-border-radius: 6; " +
+        card.setStyle("-fx-background-color: #ffffff; -fx-border-color: #dbe0f0; -fx-border-radius: 6; " +
                 "-fx-background-radius: 6; -fx-font-family: 'Consolas', 'Courier New', monospace;");
 
         // Header row: order number (left) and date (right)
         Label orderNoLabel = new Label("Order #" + order.getId());
         orderNoLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
         Label dateLabel = new Label(DateUtil.formatForDisplay(order.getOrderDate()));
-        dateLabel.setStyle("-fx-text-fill: #7f8c8d; -fx-font-size: 11px;");
+        dateLabel.setStyle("-fx-text-fill: #64748b; -fx-font-size: 11px;");
         HBox header = row(orderNoLabel, dateLabel);
 
         // Payment / status line
         Label metaLabel = new Label(order.getPaymentMethod() + " (" + order.getPaymentStatus() + ")  \u2022  "
                 + order.getOrderStatus());
-        metaLabel.setStyle("-fx-text-fill: #7f8c8d; -fx-font-size: 11px;");
+        metaLabel.setStyle("-fx-text-fill: #64748b; -fx-font-size: 11px;");
 
         card.getChildren().addAll(header, metaLabel, new Separator());
 

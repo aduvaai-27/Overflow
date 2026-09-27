@@ -24,13 +24,21 @@
         <ComboBox fx:id="customerCombo" prefWidth="220" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
     </HBox>
 
-    <HBox spacing="10" alignment="CENTER_LEFT" styleClass="stat-card">
-        <Label text="Product:"/>
-        <ComboBox fx:id="productCombo" prefWidth="220"/>
-        <Label text="Qty:"/>
-        <Spinner fx:id="qtySpinner" prefWidth="80" editable="true"/>
-        <Button text="Add to Cart" styleClass="button-secondary" onAction="#handleAddToCart"/>
-    </HBox>
+    <VBox spacing="8" styleClass="stat-card">
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Label text="Supplier:"/>
+            <ComboBox fx:id="supplierCombo" prefWidth="220" promptText="Select a supplier"/>
+            <Label text="Product:"/>
+            <ComboBox fx:id="productCombo" prefWidth="220" promptText="Select a product"/>
+            <Label text="Qty:"/>
+            <Spinner fx:id="qtySpinner" prefWidth="80" editable="true"/>
+            <Button text="Add to Cart" styleClass="button-secondary" onAction="#handleAddToCart"/>
+        </HBox>
+        <HBox spacing="24" alignment="CENTER_LEFT">
+            <Label fx:id="productHintLabel" text="Select a supplier to see only their products, or select a product to have its supplier filled in automatically." styleClass="stat-card-label" wrapText="true" maxWidth="420"/>
+            <Label fx:id="productCodeLabel" text="Product Code: —" styleClass="stat-card-label"/>
+        </HBox>
+    </VBox>
 
     <TableView fx:id="cartTable" VBox.vgrow="ALWAYS">
         <columns>

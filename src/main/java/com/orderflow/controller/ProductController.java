@@ -2,8 +2,10 @@ package com.orderflow.controller;
 
 import com.orderflow.business.CategoryService;
 import com.orderflow.business.ProductService;
+import com.orderflow.business.SupplierService;
 import com.orderflow.model.Category;
 import com.orderflow.model.Product;
+import com.orderflow.model.Supplier;
 import com.orderflow.util.AlertUtil;
 import com.orderflow.util.TableColorUtil;
 import javafx.collections.FXCollections;
@@ -17,6 +19,7 @@ public class ProductController {
     @FXML private TextField nameField;
     @FXML private TextField skuField;
     @FXML private ComboBox<Category> categoryCombo;
+    @FXML private ComboBox<Supplier> supplierCombo;
     @FXML private TextField purchasePriceField;
     @FXML private TextField sellingPriceField;
     @FXML private TextField stockQtyField;
@@ -29,7 +32,6 @@ public class ProductController {
     @FXML private TableColumn<Product, String> skuColumn;
     @FXML private TableColumn<Product, String> categoryColumn;
     @FXML private TableColumn<Product, String> supplierColumn;
-    @FXML private Label supplierHintLabel;
     @FXML private TableColumn<Product, Double> purchasePriceColumn;
     @FXML private TableColumn<Product, Double> sellingPriceColumn;
     @FXML private TableColumn<Product, Integer> stockColumn;
@@ -38,6 +40,7 @@ public class ProductController {
 
     private final ProductService productService = new ProductService();
     private final CategoryService categoryService = new CategoryService();
+    private final SupplierService supplierService = new SupplierService();
     private final ObservableList<Product> productList = FXCollections.observableArrayList();
 
     private Product selectedProduct;
@@ -49,8 +52,8 @@ public class ProductController {
         skuColumn.setCellValueFactory(new PropertyValueFactory<>("sku"));
         categoryColumn.setCellValueFactory(new PropertyValueFactory<>("categoryName"));
         supplierColumn.setCellValueFactory(cellData -> {
-            String supplierNames = cellData.getValue().getSupplierNamesDisplay();
-            return new javafx.beans.property.SimpleStringProperty(supplierNames == null || supplierNames.isBlank() ? "-" : supplierNames);
+            String supplierName = cellData.getValue().getSupplierName();
+            return new javafx.beans.property.SimpleStringProperty(supplierName == null || supplierName.isBlank() ? "Unassigned" : supplierName);
         });
         purchasePriceColumn.setCellValueFactory(new PropertyValueFactory<>("purchasePrice"));
         sellingPriceColumn.setCellValueFactory(new PropertyValueFactory<>("sellingPrice"));
@@ -63,13 +66,13 @@ public class ProductController {
             return new javafx.beans.property.SimpleStringProperty(text);
         });
         TableColorUtil.colorizeText(statusColumn, value -> switch (value) {
-            case "OK" -> "#2ecc71";
-            case "LOW STOCK" -> "#e74c3c";
-            default -> "#95a5a6";
+            case "OK" -> "#16a34a";
+            case "LOW STOCK" -> "#dc2626";
+            default -> "#64748b";
         });
 
         categoryCombo.setItems(FXCollections.observableArrayList(categoryService.findAll()));
-        categoryCombo.valueProperty().addListener((obs, oldVal, newVal) -> updateSupplierHint(newVal));
+        supplierCombo.setItems(FXCollections.observableArrayList(supplierService.findAll()));
 
         productTable.setItems(productList);
         productTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
@@ -81,22 +84,6 @@ public class ProductController {
 
     private void refresh() {
         productList.setAll(productService.findAll());
-    }
-
-    /**
-     * A product doesn't pick its own supplier - it's determined by which
-     * companies supply its category (set on the Suppliers page, since a
-     * category can have more than one supplier), so this just shows what
-     * that is as the user picks a category.
-     */
-    private void updateSupplierHint(Category category) {
-        if (category == null) {
-            supplierHintLabel.setText("(select a category)");
-        } else if (category.getSuppliersDisplay() == null || category.getSuppliersDisplay().isBlank()) {
-            supplierHintLabel.setText("No supplier assigned to this category yet");
-        } else {
-            supplierHintLabel.setText(category.getSuppliersDisplay());
-        }
     }
 
     private void populateForm(Product p) {
@@ -111,6 +98,15 @@ public class ProductController {
             if (c.getId() == p.getCategoryId()) {
                 categoryCombo.getSelectionModel().select(c);
                 break;
+            }
+        }
+        supplierCombo.getSelectionModel().clearSelection();
+        if (p.getSupplierId() != null) {
+            for (Supplier s : supplierCombo.getItems()) {
+                if (s.getId() == p.getSupplierId()) {
+                    supplierCombo.getSelectionModel().select(s);
+                    break;
+                }
             }
         }
     }
@@ -171,8 +167,8 @@ public class ProductController {
         stockQtyField.clear();
         minStockField.clear();
         categoryCombo.getSelectionModel().clearSelection();
+        supplierCombo.getSelectionModel().clearSelection();
         productTable.getSelectionModel().clearSelection();
-        supplierHintLabel.setText("(select a category)");
     }
 
     @FXML
@@ -196,9 +192,15 @@ public class ProductController {
         String name = nameField.getText().trim();
         String sku = skuField.getText().trim();
         Category category = categoryCombo.getValue();
+        Supplier supplier = supplierCombo.getValue();
 
         if (name.isEmpty() || sku.isEmpty() || category == null) {
             AlertUtil.warn("Validation", "Name, SKU and Category are required.");
+            return null;
+        }
+        if (supplier == null) {
+            AlertUtil.warn("Validation", "Choose which company owns this listing. "
+                    + "If the same item is sold by two companies, add it twice - once per supplier.");
             return null;
         }
 
@@ -219,6 +221,7 @@ public class ProductController {
         p.setName(name);
         p.setSku(sku);
         p.setCategoryId(category.getId());
+        p.setSupplierId(supplier.getId());
         p.setPurchasePrice(purchasePrice);
         p.setSellingPrice(sellingPrice);
         p.setStockQty(stockQty);

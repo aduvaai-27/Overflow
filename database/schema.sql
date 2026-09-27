@@ -19,17 +19,25 @@ CREATE TABLE IF NOT EXISTS categories (
     name TEXT NOT NULL UNIQUE
 );
 
+-- Every product row is owned by exactly ONE supplier - it is that company's
+-- own listing (its own stock, its own price, its own SKU). Two companies
+-- selling something with the same name (e.g. both sell a "Cotton T-Shirt")
+-- are simply two separate product rows that happen to share a name; they
+-- are never the same inventory line. supplier_id is nullable only for the
+-- brief window before an owning supplier has been assigned on the Products page.
 CREATE TABLE IF NOT EXISTS products (
     id             INTEGER PRIMARY KEY AUTOINCREMENT,
     name           TEXT NOT NULL,
     sku            TEXT UNIQUE,
     category_id    INTEGER,
+    supplier_id    INTEGER,
     purchase_price REAL NOT NULL DEFAULT 0,
     selling_price  REAL NOT NULL DEFAULT 0,
     stock_qty      INTEGER NOT NULL DEFAULT 0,
     min_stock      INTEGER NOT NULL DEFAULT 5,
     active         INTEGER NOT NULL DEFAULT 1,        -- 1 = active, 0 = deactivated
-    FOREIGN KEY (category_id) REFERENCES categories(id)
+    FOREIGN KEY (category_id) REFERENCES categories(id),
+    FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
 );
 
 CREATE TABLE IF NOT EXISTS customers (
@@ -149,14 +157,19 @@ INSERT OR IGNORE INTO category_suppliers (category_id, supplier_id) VALUES
  (2, 2),
  (2, 3);
 
-INSERT OR IGNORE INTO products (id, name, sku, category_id, purchase_price, selling_price, stock_qty, min_stock, active) VALUES
- (1, 'Wireless Mouse', 'ELEC-001', 1, 400, 650, 25, 5, 1),
- (2, 'Bluetooth Headphone', 'ELEC-002', 1, 1200, 1899, 15, 5, 1),
- (3, 'Cotton T-Shirt', 'CLTH-001', 2, 250, 499, 40, 10, 1),
- (4, 'Denim Jeans', 'CLTH-002', 2, 800, 1299, 20, 5, 1),
- (5, 'Instant Noodles (Pack)', 'GROC-001', 3, 30, 55, 100, 20, 1),
- (6, 'Leather Wallet', 'ACC-001', 4, 350, 699, 8, 5, 1),
- (7, 'Phone Charger Cable', 'ELEC-003', 1, 90, 199, 3, 10, 1);
+-- Note rows 3 and 8: both are named "Cotton T-Shirt" and both are Clothing,
+-- but they are owned by two different suppliers, each with its own SKU,
+-- price and stock - proof that the same product name can be sold by more
+-- than one company as genuinely separate listings.
+INSERT OR IGNORE INTO products (id, name, sku, category_id, supplier_id, purchase_price, selling_price, stock_qty, min_stock, active) VALUES
+ (1, 'Wireless Mouse', 'ELEC-001', 1, 1, 400, 650, 25, 5, 1),
+ (2, 'Bluetooth Headphone', 'ELEC-002', 1, 1, 1200, 1899, 15, 5, 1),
+ (3, 'Cotton T-Shirt', 'CLTH-001', 2, 2, 250, 499, 40, 10, 1),
+ (4, 'Denim Jeans', 'CLTH-002', 2, 2, 800, 1299, 20, 5, 1),
+ (5, 'Instant Noodles (Pack)', 'GROC-001', 3, NULL, 30, 55, 100, 20, 1),
+ (6, 'Leather Wallet', 'ACC-001', 4, NULL, 350, 699, 8, 5, 1),
+ (7, 'Phone Charger Cable', 'ELEC-003', 1, 1, 90, 199, 3, 10, 1),
+ (8, 'Cotton T-Shirt', 'CLTH-003', 2, 3, 270, 549, 18, 8, 1);
 
 INSERT OR IGNORE INTO customers (id, name, phone, email, address) VALUES
  (1, 'Rahim Uddin', '01710000001', 'rahim@example.com', 'Khulna, Bangladesh'),
