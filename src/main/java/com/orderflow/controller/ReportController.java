@@ -1,6 +1,6 @@
 package com.orderflow.controller;
 
-import com.orderflow.dao.OrderDAO;
+import com.orderflow.business.OrderService;
 import com.orderflow.model.Order;
 import com.orderflow.model.ProductSalesRow;
 import com.orderflow.util.AlertUtil;
@@ -43,7 +43,7 @@ public class ReportController {
     @FXML private BarChart<String, Number> topSellingChart;   // highest selling product (to customers), by quantity
     @FXML private BarChart<String, Number> topRevenueChart;   // highest revenue generating product
 
-    private final OrderDAO orderDAO = new OrderDAO();
+    private final OrderService orderService = new OrderService();
     private final ObservableList<Order> reportList = FXCollections.observableArrayList();
 
     @FXML
@@ -81,7 +81,7 @@ public class ReportController {
             return;
         }
 
-        List<Order> orders = orderDAO.findBetweenDates(from.toString(), to.toString());
+        List<Order> orders = orderService.findBetweenDates(from.toString(), to.toString());
         reportList.setAll(orders);
 
         double revenue = orders.stream()
@@ -93,7 +93,7 @@ public class ReportController {
         revenueLabel.setText(String.format("%.2f", revenue));
         avgOrderLabel.setText(orders.isEmpty() ? "0.00" : String.format("%.2f", revenue / orders.size()));
 
-        List<ProductSalesRow> sales = orderDAO.productSalesBetween(from.toString(), to.toString());
+        List<ProductSalesRow> sales = orderService.productSalesBetween(from.toString(), to.toString());
         renderTopSellingChart(sales);
         renderTopRevenueChart(sales);
     }

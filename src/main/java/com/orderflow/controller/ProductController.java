@@ -1,7 +1,7 @@
 package com.orderflow.controller;
 
-import com.orderflow.dao.CategoryDAO;
-import com.orderflow.dao.ProductDAO;
+import com.orderflow.business.CategoryService;
+import com.orderflow.business.ProductService;
 import com.orderflow.model.Category;
 import com.orderflow.model.Product;
 import com.orderflow.util.AlertUtil;
@@ -36,8 +36,8 @@ public class ProductController {
     @FXML private TableColumn<Product, Integer> minStockColumn;
     @FXML private TableColumn<Product, String> statusColumn;
 
-    private final ProductDAO productDAO = new ProductDAO();
-    private final CategoryDAO categoryDAO = new CategoryDAO();
+    private final ProductService productService = new ProductService();
+    private final CategoryService categoryService = new CategoryService();
     private final ObservableList<Product> productList = FXCollections.observableArrayList();
 
     private Product selectedProduct;
@@ -68,7 +68,7 @@ public class ProductController {
             default -> "#95a5a6";
         });
 
-        categoryCombo.setItems(FXCollections.observableArrayList(categoryDAO.findAll()));
+        categoryCombo.setItems(FXCollections.observableArrayList(categoryService.findAll()));
         categoryCombo.valueProperty().addListener((obs, oldVal, newVal) -> updateSupplierHint(newVal));
 
         productTable.setItems(productList);
@@ -80,7 +80,7 @@ public class ProductController {
     }
 
     private void refresh() {
-        productList.setAll(productDAO.findAll());
+        productList.setAll(productService.findAll());
     }
 
     /**
@@ -120,7 +120,7 @@ public class ProductController {
         Product p = buildProductFromForm(null);
         if (p == null) return;
 
-        if (productDAO.add(p)) {
+        if (productService.add(p)) {
             AlertUtil.info("Success", "Product added successfully.");
             handleClear();
             refresh();
@@ -139,7 +139,7 @@ public class ProductController {
         if (p == null) return;
         p.setActive(selectedProduct.isActive());
 
-        if (productDAO.update(p)) {
+        if (productService.update(p)) {
             AlertUtil.info("Success", "Product updated successfully.");
             handleClear();
             refresh();
@@ -155,7 +155,7 @@ public class ProductController {
             return;
         }
         if (AlertUtil.confirm("Confirm", "Deactivate '" + selectedProduct.getName() + "'? It will no longer appear for new orders.")) {
-            productDAO.deactivate(selectedProduct.getId());
+            productService.deactivate(selectedProduct.getId());
             handleClear();
             refresh();
         }
@@ -181,7 +181,7 @@ public class ProductController {
         if (keyword.isEmpty()) {
             refresh();
         } else {
-            productList.setAll(productDAO.search(keyword));
+            productList.setAll(productService.search(keyword));
         }
     }
 

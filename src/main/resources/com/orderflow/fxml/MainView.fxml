@@ -11,21 +11,27 @@
             fx:controller="com.orderflow.controller.MainController">
 
     <left>
-        <VBox styleClass="sidebar" fx:id="sidebarBox">
+        <VBox styleClass="sidebar" fx:id="sidebarBox" spacing="6">
             <Label text="OrderFlow" styleClass="sidebar-title"/>
             <Label text="Order &amp; Inventory System" styleClass="sidebar-subtitle"/>
 
-            <Button fx:id="btnDashboard" text="Dashboard" styleClass="nav-button" maxWidth="Infinity" onAction="#showDashboard"/>
-            <Button fx:id="btnCapital" text="Capital" styleClass="nav-button" maxWidth="Infinity" onAction="#showCapital"/>
-            <Button fx:id="btnCategories" text="Categories" styleClass="nav-button" maxWidth="Infinity" onAction="#showCategories"/>
-            <Button fx:id="btnProducts" text="Products" styleClass="nav-button" maxWidth="Infinity" onAction="#showProducts"/>
-            <Button fx:id="btnCustomers" text="Customers" styleClass="nav-button" maxWidth="Infinity" onAction="#showCustomers"/>
-            <Button fx:id="btnOrders" text="Orders" styleClass="nav-button" maxWidth="Infinity" onAction="#showOrders"/>
-            <Button fx:id="btnSuppliers" text="Suppliers" styleClass="nav-button" maxWidth="Infinity" onAction="#showSuppliers"/>
-            <Button fx:id="btnReports" text="Reports" styleClass="nav-button" maxWidth="Infinity" onAction="#showReports"/>
+            <Label text="OVERVIEW" styleClass="nav-section-label"/>
+            <Button fx:id="btnDashboard" text="🏠  Dashboard" styleClass="nav-button" maxWidth="Infinity" onAction="#showDashboard"/>
+            <Button fx:id="btnCapital" text="💰  Capital" styleClass="nav-button" maxWidth="Infinity" onAction="#showCapital"/>
+
+            <Label text="CATALOG" styleClass="nav-section-label"/>
+            <Button fx:id="btnCategories" text="🗂  Categories" styleClass="nav-button" maxWidth="Infinity" onAction="#showCategories"/>
+            <Button fx:id="btnProducts" text="📦  Products" styleClass="nav-button" maxWidth="Infinity" onAction="#showProducts"/>
+            <Button fx:id="btnSuppliers" text="🚚  Suppliers" styleClass="nav-button" maxWidth="Infinity" onAction="#showSuppliers"/>
+
+            <Label text="SALES" styleClass="nav-section-label"/>
+            <Button fx:id="btnCustomers" text="👥  Customers" styleClass="nav-button" maxWidth="Infinity" onAction="#showCustomers"/>
+            <Button fx:id="btnOrders" text="🧾  Orders" styleClass="nav-button" maxWidth="Infinity" onAction="#showOrders"/>
+
+            <Label text="INSIGHTS" styleClass="nav-section-label"/>
+            <Button fx:id="btnReports" text="📊  Reports" styleClass="nav-button" maxWidth="Infinity" onAction="#showReports"/>
 
             <VBox VBox.vgrow="ALWAYS"/>
-            <Button text="Logout" styleClass="logout-button" maxWidth="Infinity" onAction="#handleLogout"/>
         </VBox>
     </left>
 
@@ -34,6 +40,7 @@
             <Label fx:id="pageTitleLabel" text="Dashboard" styleClass="top-bar-title"/>
             <HBox HBox.hgrow="ALWAYS"/>
             <Label fx:id="welcomeLabel" text="Welcome"/>
+            <Button text="🚪  Logout" styleClass="logout-button" onAction="#handleLogout"/>
         </HBox>
     </top>
 

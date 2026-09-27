@@ -1,9 +1,9 @@
 package com.orderflow.controller;
 
-import com.orderflow.dao.CategoryDAO;
-import com.orderflow.dao.ProductDAO;
-import com.orderflow.dao.SupplierDAO;
-import com.orderflow.dao.SupplierRequestDAO;
+import com.orderflow.business.CategoryService;
+import com.orderflow.business.ProductService;
+import com.orderflow.business.SupplierService;
+import com.orderflow.business.SupplierRequestService;
 import com.orderflow.model.Category;
 import com.orderflow.model.Product;
 import com.orderflow.model.Supplier;
@@ -57,10 +57,10 @@ public class SupplierController {
     @FXML private TableColumn<SupplierRequest, String> reqPhaseColumn;
     @FXML private TableColumn<SupplierRequest, String> reqDateColumn;
 
-    private final SupplierDAO supplierDAO = new SupplierDAO();
-    private final ProductDAO productDAO = new ProductDAO();
-    private final CategoryDAO categoryDAO = new CategoryDAO();
-    private final SupplierRequestDAO requestDAO = new SupplierRequestDAO();
+    private final SupplierService supplierService = new SupplierService();
+    private final ProductService productService = new ProductService();
+    private final CategoryService categoryService = new CategoryService();
+    private final SupplierRequestService requestService = new SupplierRequestService();
 
     private final ObservableList<Supplier> supplierList = FXCollections.observableArrayList();
     private final ObservableList<SupplierRequest> requestList = FXCollections.observableArrayList();
@@ -118,11 +118,11 @@ public class SupplierController {
 
     private void refreshAll() {
         rebuildCategoryCheckboxes();
-        supplierList.setAll(supplierDAO.findAll());
-        supplierCombo.setItems(FXCollections.observableArrayList(supplierDAO.findAll()));
-        allActiveProducts = productDAO.findAllActive();
+        supplierList.setAll(supplierService.findAll());
+        supplierCombo.setItems(FXCollections.observableArrayList(supplierService.findAll()));
+        allActiveProducts = productService.findAllActive();
         filterProductsBySupplier(supplierCombo.getValue());
-        requestList.setAll(requestDAO.findAll());
+        requestList.setAll(requestService.findAll());
     }
 
     /** Builds one checkbox per existing category, for the "which categories does this company supply" form field. */
@@ -134,7 +134,7 @@ public class SupplierController {
 
         categoryCheckboxes.clear();
         categoryCheckboxBox.getChildren().clear();
-        for (Category category : categoryDAO.findAll()) {
+        for (Category category : categoryService.findAll()) {
             CheckBox checkBox = new CheckBox(category.getName());
             checkBox.setUserData(category.getId());
             checkBox.setSelected(previouslyChecked.contains(category.getId()));
@@ -173,7 +173,7 @@ public class SupplierController {
         emailField.setText(s.getEmail());
         addressField.setText(s.getAddress());
 
-        Set<Integer> linkedCategoryIds = supplierDAO.findCategoryIdsForSupplier(s.getId());
+        Set<Integer> linkedCategoryIds = supplierService.findCategoryIdsForSupplier(s.getId());
         for (CheckBox cb : categoryCheckboxes) {
             cb.setSelected(linkedCategoryIds.contains((Integer) cb.getUserData()));
         }
@@ -185,7 +185,7 @@ public class SupplierController {
     private void handleAddSupplier() {
         Supplier s = buildFromForm(0);
         if (s == null) return;
-        if (supplierDAO.add(s, selectedCategoryIds())) {
+        if (supplierService.add(s, selectedCategoryIds())) {
             handleClearSupplierForm();
             refreshAll();
         } else {
@@ -201,7 +201,7 @@ public class SupplierController {
         }
         Supplier s = buildFromForm(selectedSupplier.getId());
         if (s == null) return;
-        supplierDAO.update(s, selectedCategoryIds());
+        supplierService.update(s, selectedCategoryIds());
         handleClearSupplierForm();
         refreshAll();
     }
@@ -213,7 +213,7 @@ public class SupplierController {
             return;
         }
         if (AlertUtil.confirm("Confirm delete", "Delete supplier '" + selectedSupplier.getName() + "'?")) {
-            if (!supplierDAO.delete(selectedSupplier.getId())) {
+            if (!supplierService.delete(selectedSupplier.getId())) {
                 AlertUtil.error("Error", "Could not delete this supplier. They may already have restock requests on file.");
             }
             handleClearSupplierForm();
@@ -266,7 +266,7 @@ public class SupplierController {
             return;
         }
 
-        if (requestDAO.createRequest(supplier.getId(), product.getId(), qty, unitCost)) {
+        if (requestService.createRequest(supplier.getId(), product.getId(), qty, unitCost)) {
             AlertUtil.info("Request sent", "Restock request sent to " + supplier.getName() + ".");
             refreshAll();
         } else {
@@ -285,7 +285,7 @@ public class SupplierController {
             return;
         }
 
-        if (!requestDAO.advancePhase(request)) {
+        if (!requestService.advancePhase(request)) {
             AlertUtil.error("Error", "Could not advance this request's phase.");
         }
         refreshAll();

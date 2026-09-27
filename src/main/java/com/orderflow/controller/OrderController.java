@@ -1,6 +1,6 @@
 package com.orderflow.controller;
 
-import com.orderflow.dao.OrderDAO;
+import com.orderflow.business.OrderService;
 import com.orderflow.model.Order;
 import com.orderflow.model.OrderItem;
 import com.orderflow.util.AlertUtil;
@@ -34,7 +34,7 @@ public class OrderController {
     @FXML private Button markPaidButton;
     @FXML private Button cancelOrderButton;
 
-    private final OrderDAO orderDAO = new OrderDAO();
+    private final OrderService orderService = new OrderService();
     private final ObservableList<Order> orderList = FXCollections.observableArrayList();
 
     // Simplified linear lifecycle used by the "Advance Status" button.
@@ -86,11 +86,11 @@ public class OrderController {
                 && ("Delivered".equals(order.getOrderStatus()) || "Completed".equals(order.getOrderStatus()));
         markPaidButton.setDisable(!canMarkPaid);
 
-        cancelOrderButton.setDisable(!orderDAO.isCancellable(order.getOrderStatus()));
+        cancelOrderButton.setDisable(!orderService.isCancellable(order.getOrderStatus()));
     }
 
     private void refresh() {
-        orderList.setAll(orderDAO.findAll());
+        orderList.setAll(orderService.findAll());
         updateActionButtons(orderTable.getSelectionModel().getSelectedItem());
     }
 
@@ -128,7 +128,7 @@ public class OrderController {
             return;
         }
 
-        List<OrderItem> items = orderDAO.findItemsByOrderId(order.getId());
+        List<OrderItem> items = orderService.findItemsByOrderId(order.getId());
         String invoiceText = buildInvoiceText(order, items);
 
         TextArea textArea = new TextArea(invoiceText);
@@ -193,11 +193,11 @@ public class OrderController {
         }
 
         String nextStatus = STATUS_FLOW.get(currentIndex + 1);
-        orderDAO.updateOrderStatus(order.getId(), nextStatus);
+        orderService.updateOrderStatus(order.getId(), nextStatus);
 
         // Business rule: COD payment becomes "Paid" once the order is delivered
         if (nextStatus.equals("Delivered") && "COD".equals(order.getPaymentMethod())) {
-            orderDAO.markPaymentPaid(order.getId());
+            orderService.markPaymentPaid(order.getId());
         }
 
         refresh();
@@ -209,7 +209,7 @@ public class OrderController {
         if (order == null) return;
         // The button is only enabled once the order is actually Delivered/Completed
         // and not already Paid, so no extra popup is needed here.
-        orderDAO.markPaymentPaid(order.getId());
+        orderService.markPaymentPaid(order.getId());
         refresh();
     }
 
@@ -219,7 +219,7 @@ public class OrderController {
         if (order == null) return;
         // The button is only enabled while the order is still cancellable.
         if (AlertUtil.confirm("Cancel order", "Cancel order #" + order.getId() + "? Reserved stock will be returned.")) {
-            if (!orderDAO.cancelOrder(order.getId())) {
+            if (!orderService.cancelOrder(order.getId())) {
                 AlertUtil.error("Error", "Could not cancel this order.");
             }
             refresh();

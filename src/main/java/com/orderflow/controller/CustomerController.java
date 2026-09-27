@@ -1,7 +1,7 @@
 package com.orderflow.controller;
 
-import com.orderflow.dao.CustomerDAO;
-import com.orderflow.dao.OrderDAO;
+import com.orderflow.business.CustomerService;
+import com.orderflow.business.OrderService;
 import com.orderflow.model.Customer;
 import com.orderflow.model.Order;
 import com.orderflow.model.OrderItem;
@@ -43,8 +43,8 @@ public class CustomerController {
     @FXML private TableColumn<Customer, String> emailColumn;
     @FXML private TableColumn<Customer, String> addressColumn;
 
-    private final CustomerDAO customerDAO = new CustomerDAO();
-    private final OrderDAO orderDAO = new OrderDAO();
+    private final CustomerService customerService = new CustomerService();
+    private final OrderService orderService = new OrderService();
     private final ObservableList<Customer> customerList = FXCollections.observableArrayList();
     private Customer selectedCustomer;
 
@@ -76,7 +76,7 @@ public class CustomerController {
     }
 
     private void refresh() {
-        customerList.setAll(customerDAO.findAll());
+        customerList.setAll(customerService.findAll());
     }
 
     private void populateForm(Customer c) {
@@ -91,7 +91,7 @@ public class CustomerController {
     private void handleAdd() {
         Customer c = buildFromForm(0);
         if (c == null) return;
-        if (customerDAO.add(c)) {
+        if (customerService.add(c)) {
             handleClear();
             refresh();
         } else {
@@ -107,7 +107,7 @@ public class CustomerController {
         }
         Customer c = buildFromForm(selectedCustomer.getId());
         if (c == null) return;
-        customerDAO.update(c);
+        customerService.update(c);
         handleClear();
         refresh();
     }
@@ -119,7 +119,7 @@ public class CustomerController {
             return;
         }
         if (AlertUtil.confirm("Confirm delete", "Delete customer '" + selectedCustomer.getName() + "'?")) {
-            if (!customerDAO.delete(selectedCustomer.getId())) {
+            if (!customerService.delete(selectedCustomer.getId())) {
                 AlertUtil.error("Error", "Could not delete this customer. They may already have existing orders.");
             }
             handleClear();
@@ -143,7 +143,7 @@ public class CustomerController {
         if (keyword.isEmpty()) {
             refresh();
         } else {
-            customerList.setAll(customerDAO.search(keyword));
+            customerList.setAll(customerService.search(keyword));
         }
     }
 
@@ -165,7 +165,7 @@ public class CustomerController {
 
     /** Shows what, when and how this customer has bought - as a stack of small receipt-style cards, one per order. */
     private void showHistory(Customer customer) {
-        List<Order> orders = orderDAO.findByCustomerId(customer.getId());
+        List<Order> orders = orderService.findByCustomerId(customer.getId());
 
         VBox container = new VBox(14);
         container.setPadding(new Insets(4));
@@ -198,7 +198,7 @@ public class CustomerController {
 
     /** One order rendered like a small printed receipt/bill card. */
     private VBox buildReceiptCard(Order order) {
-        List<OrderItem> items = orderDAO.findItemsByOrderId(order.getId());
+        List<OrderItem> items = orderService.findItemsByOrderId(order.getId());
 
         VBox card = new VBox(6);
         card.setPadding(new Insets(12));

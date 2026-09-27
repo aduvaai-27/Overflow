@@ -1,8 +1,8 @@
 package com.orderflow.controller;
 
-import com.orderflow.dao.CustomerDAO;
-import com.orderflow.dao.OrderDAO;
-import com.orderflow.dao.ProductDAO;
+import com.orderflow.business.CustomerService;
+import com.orderflow.business.OrderService;
+import com.orderflow.business.ProductService;
 import com.orderflow.model.Customer;
 import com.orderflow.model.Order;
 import com.orderflow.model.OrderItem;
@@ -39,17 +39,17 @@ public class NewOrderController {
     @FXML private Label deliveryLabel;
     @FXML private Label totalLabel;
 
-    private final CustomerDAO customerDAO = new CustomerDAO();
-    private final ProductDAO productDAO = new ProductDAO();
-    private final OrderDAO orderDAO = new OrderDAO();
+    private final CustomerService customerService = new CustomerService();
+    private final ProductService productService = new ProductService();
+    private final OrderService orderService = new OrderService();
 
     private final ObservableList<OrderItem> cart = FXCollections.observableArrayList();
     private boolean orderCreated = false;
 
     @FXML
     public void initialize() {
-        customerCombo.setItems(FXCollections.observableArrayList(customerDAO.findAll()));
-        productCombo.setItems(FXCollections.observableArrayList(productDAO.findAllActive()));
+        customerCombo.setItems(FXCollections.observableArrayList(customerService.findAll()));
+        productCombo.setItems(FXCollections.observableArrayList(productService.findAllActive()));
 
         qtySpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 999, 1));
 
@@ -151,7 +151,7 @@ public class NewOrderController {
         order.setOrderStatus("Confirmed");
 
         List<OrderItem> items = new ArrayList<>(cart);
-        int newOrderId = orderDAO.createOrder(order, items);
+        int newOrderId = orderService.createOrder(order, items);
 
         if (newOrderId == -1) {
             AlertUtil.error("Order failed", "Could not create the order. Stock may have changed - please review quantities and try again.");

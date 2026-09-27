@@ -1,9 +1,9 @@
 package com.orderflow.controller;
 
-import com.orderflow.dao.CapitalDAO;
-import com.orderflow.dao.CustomerDAO;
-import com.orderflow.dao.OrderDAO;
-import com.orderflow.dao.ProductDAO;
+import com.orderflow.business.CapitalService;
+import com.orderflow.business.CustomerService;
+import com.orderflow.business.OrderService;
+import com.orderflow.business.ProductService;
 import com.orderflow.model.CustomerOrderCount;
 import com.orderflow.model.MonthlyProfit;
 import com.orderflow.service.ExchangeRateService;
@@ -33,10 +33,10 @@ public class DashboardController implements Disposable {
     @FXML private Label pendingCodLabel;
     @FXML private BarChart<String, Number> monthlyProfitChart;
 
-    private final ProductDAO productDAO = new ProductDAO();
-    private final CustomerDAO customerDAO = new CustomerDAO();
-    private final OrderDAO orderDAO = new OrderDAO();
-    private final CapitalDAO capitalDAO = new CapitalDAO();
+    private final ProductService productService = new ProductService();
+    private final CustomerService customerService = new CustomerService();
+    private final OrderService orderService = new OrderService();
+    private final CapitalService capitalService = new CapitalService();
     private final ExchangeRateService exchangeRateService = new ExchangeRateService();
 
     // Background thread that keeps the low-stock counter fresh (Multithreading topic)
@@ -59,18 +59,18 @@ public class DashboardController implements Disposable {
     }
 
     private void loadStats() {
-        totalProductsLabel.setText(String.valueOf(productDAO.countActive()));
-        totalCustomersLabel.setText(String.valueOf(customerDAO.countAll()));
-        totalOrdersLabel.setText(String.valueOf(orderDAO.countAllOrders()));
+        totalProductsLabel.setText(String.valueOf(productService.countActive()));
+        totalCustomersLabel.setText(String.valueOf(customerService.countAll()));
+        totalOrdersLabel.setText(String.valueOf(orderService.countAllOrders()));
         // Revenue = total sales value. Capital = the business's own money on hand.
         // These are intentionally two different numbers.
-        lastKnownRevenue = orderDAO.totalRevenue();
-        lastKnownCapital = capitalDAO.getCurrentCapital();
+        lastKnownRevenue = orderService.totalRevenue();
+        lastKnownCapital = capitalService.getCurrentCapital();
         totalRevenueLabel.setText(String.format("%.2f", lastKnownRevenue));
         capitalLabel.setText(String.format("%.2f", lastKnownCapital));
-        pendingCodLabel.setText(String.valueOf(orderDAO.countPendingCOD()));
+        pendingCodLabel.setText(String.valueOf(orderService.countPendingCOD()));
 
-        CustomerOrderCount bestCustomer = orderDAO.bestCustomerByOrderCount();
+        CustomerOrderCount bestCustomer = orderService.bestCustomerByOrderCount();
         bestCustomerLabel.setText(bestCustomer == null
                 ? "No orders yet"
                 : bestCustomer.getCustomerName() + " (" + bestCustomer.getOrderCount() + " orders)");
@@ -105,7 +105,7 @@ public class DashboardController implements Disposable {
     }
 
     private void loadProfitChart() {
-        List<MonthlyProfit> monthly = orderDAO.monthlyProfit(PROFIT_CHART_MONTHS);
+        List<MonthlyProfit> monthly = orderService.monthlyProfit(PROFIT_CHART_MONTHS);
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Profit (Tk)");
         for (MonthlyProfit mp : monthly) {

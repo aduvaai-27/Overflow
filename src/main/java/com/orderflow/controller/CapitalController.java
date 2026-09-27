@@ -1,6 +1,6 @@
 package com.orderflow.controller;
 
-import com.orderflow.dao.CapitalDAO;
+import com.orderflow.business.CapitalService;
 import com.orderflow.model.CapitalTransaction;
 import com.orderflow.util.AlertUtil;
 import com.orderflow.util.DateUtil;
@@ -25,7 +25,7 @@ public class CapitalController {
     @FXML private TableColumn<CapitalTransaction, String> reasonColumn;
     @FXML private TableColumn<CapitalTransaction, String> dateColumn;
 
-    private final CapitalDAO capitalDAO = new CapitalDAO();
+    private final CapitalService capitalService = new CapitalService();
     private final ObservableList<CapitalTransaction> historyList = FXCollections.observableArrayList();
 
     @FXML
@@ -41,8 +41,8 @@ public class CapitalController {
     }
 
     private void refresh() {
-        currentCapitalLabel.setText(String.format("Tk %.2f", capitalDAO.getCurrentCapital()));
-        historyList.setAll(capitalDAO.findAll());
+        currentCapitalLabel.setText(String.format("Tk %.2f", capitalService.getCurrentCapital()));
+        historyList.setAll(capitalService.findAll());
     }
 
     @FXML
@@ -107,7 +107,7 @@ public class CapitalController {
             return;
         }
 
-        if (capitalDAO.addEntry(amount, source, reason)) {
+        if (capitalService.addEntry(amount, source, reason)) {
             refresh();
         } else {
             AlertUtil.error("Error", "Could not save this capital entry.");

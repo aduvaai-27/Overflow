@@ -1,6 +1,6 @@
 package com.orderflow.controller;
 
-import com.orderflow.dao.CategoryDAO;
+import com.orderflow.business.CategoryService;
 import com.orderflow.model.Category;
 import com.orderflow.util.AlertUtil;
 import javafx.collections.FXCollections;
@@ -19,7 +19,7 @@ public class CategoryController {
     @FXML private TableColumn<Category, String> suppliersColumn;
     @FXML private TextField nameField;
 
-    private final CategoryDAO categoryDAO = new CategoryDAO();
+    private final CategoryService categoryService = new CategoryService();
     private final ObservableList<Category> categoryList = FXCollections.observableArrayList();
     private Category selectedCategory;
 
@@ -44,7 +44,7 @@ public class CategoryController {
     }
 
     private void refresh() {
-        categoryList.setAll(categoryDAO.findAll());
+        categoryList.setAll(categoryService.findAll());
     }
 
     @FXML
@@ -54,7 +54,7 @@ public class CategoryController {
             AlertUtil.warn("Validation", "Please enter a category name.");
             return;
         }
-        if (categoryDAO.add(name)) {
+        if (categoryService.add(name)) {
             handleClear();
             refresh();
         } else {
@@ -73,7 +73,7 @@ public class CategoryController {
             AlertUtil.warn("Validation", "Please enter a category name.");
             return;
         }
-        categoryDAO.update(selectedCategory.getId(), name);
+        categoryService.update(selectedCategory.getId(), name);
         handleClear();
         refresh();
     }
@@ -85,7 +85,7 @@ public class CategoryController {
             return;
         }
         if (AlertUtil.confirm("Confirm delete", "Delete category '" + selectedCategory.getName() + "'?")) {
-            if (!categoryDAO.delete(selectedCategory.getId())) {
+            if (!categoryService.delete(selectedCategory.getId())) {
                 AlertUtil.error("Error", "Could not delete this category. It may still be used by existing products.");
             }
             handleClear();

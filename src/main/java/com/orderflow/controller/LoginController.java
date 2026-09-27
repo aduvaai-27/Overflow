@@ -1,7 +1,7 @@
 package com.orderflow.controller;
 
 import com.orderflow.Main;
-import com.orderflow.dao.UserDAO;
+import com.orderflow.business.UserService;
 import com.orderflow.model.User;
 import com.orderflow.util.PasswordUtil;
 import com.orderflow.util.Session;
@@ -18,7 +18,7 @@ public class LoginController {
     @FXML private PasswordField passwordField;
     @FXML private Label errorLabel;
 
-    private final UserDAO userDAO = new UserDAO();
+    private final UserService userService = new UserService();
 
     @FXML
     private void handleLogin() {
@@ -30,7 +30,7 @@ public class LoginController {
             return;
         }
 
-        User user = userDAO.findByUsername(username);
+        User user = userService.findByUsername(username);
 
         if (user == null || !PasswordUtil.matches(password, user.getPasswordHash())) {
             showError("Invalid username or password.");
