@@ -25,6 +25,14 @@ public class ProductService {
         return productDAO.countLowStock();
     }
 
+    public String generateUniqueId(String categoryName) {
+        return productDAO.generateUniqueId(categoryName);
+    }
+
+    public int countBySupplier(int supplierId) {
+        return productDAO.countBySupplier(supplierId);
+    }
+
     public boolean add(Product p) {
         return productDAO.add(p);
     }

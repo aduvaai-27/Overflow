@@ -70,8 +70,9 @@ public class OrderDAO {
 
     public List<OrderItem> findItemsByOrderId(int orderId) {
         List<OrderItem> list = new ArrayList<>();
-        String sql = "SELECT oi.*, p.name AS product_name FROM order_items oi " +
-                     "JOIN products p ON oi.product_id = p.id WHERE oi.order_id = ?";
+        String sql = "SELECT oi.*, p.name AS product_name, p.sku AS product_sku, s.name AS supplier_name " +
+                     "FROM order_items oi JOIN products p ON oi.product_id = p.id " +
+                     "LEFT JOIN suppliers s ON oi.supplier_id = s.id WHERE oi.order_id = ?";
         try (PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement(sql)) {
             ps.setInt(1, orderId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -81,6 +82,9 @@ public class OrderDAO {
                     item.setOrderId(rs.getInt("order_id"));
                     item.setProductId(rs.getInt("product_id"));
                     item.setProductName(rs.getString("product_name"));
+                    item.setSku(rs.getString("product_sku"));
+                    item.setSupplierId(rs.getInt("supplier_id"));
+                    item.setSupplierName(rs.getString("supplier_name"));
                     item.setQuantity(rs.getInt("quantity"));
                     item.setUnitPrice(rs.getDouble("unit_price"));
                     item.setLineTotal(rs.getDouble("line_total"));
@@ -130,7 +134,7 @@ public class OrderDAO {
                 }
             }
 
-            String insertItem = "INSERT INTO order_items(order_id, product_id, quantity, unit_price, line_total) VALUES (?,?,?,?,?)";
+            String insertItem = "INSERT INTO order_items(order_id, product_id, quantity, unit_price, line_total, supplier_id) VALUES (?,?,?,?,?,?)";
             String reduceStock = "UPDATE products SET stock_qty = stock_qty - ? WHERE id = ? AND stock_qty >= ?";
             String logTxn = "INSERT INTO inventory_transactions(product_id, change_qty, reason, transaction_date) VALUES (?,?,?,?)";
             String getCost = "SELECT purchase_price FROM products WHERE id = ?";
@@ -148,6 +152,8 @@ public class OrderDAO {
                     psItem.setInt(3, item.getQuantity());
                     psItem.setDouble(4, item.getUnitPrice());
                     psItem.setDouble(5, item.getLineTotal());
+                    if (item.getSupplierId() > 0) psItem.setInt(6, item.getSupplierId());
+                    else psItem.setNull(6, Types.INTEGER);
                     psItem.executeUpdate();
 
                     // Only reduces stock if enough is available (WHERE stock_qty >= ?)

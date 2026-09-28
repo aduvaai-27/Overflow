@@ -117,6 +117,17 @@ public class SupplierDAO {
     }
 
     public boolean delete(int id) {
+        // Products point at their supplier, so a supplier that still has products can't be removed.
+        if (new ProductDAO().countBySupplier(id) > 0) return false;
+        // Past order lines keep existing; they just no longer point at this supplier.
+        try (PreparedStatement psNull = DatabaseConnection.getConnection().prepareStatement(
+                "UPDATE order_items SET supplier_id = NULL WHERE supplier_id = ?")) {
+            psNull.setInt(1, id);
+            psNull.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
         try (PreparedStatement ps1 = DatabaseConnection.getConnection().prepareStatement(
                 "DELETE FROM category_suppliers WHERE supplier_id = ?")) {
             ps1.setInt(1, id);

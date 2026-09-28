@@ -9,69 +9,67 @@
 <?import javafx.scene.layout.VBox?>
 
 <ScrollPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.orderflow.controller.DashboardController" fitToWidth="true">
-<VBox spacing="20" style="-fx-padding: 0 4 20 0;">
+            fx:controller="com.orderflow.controller.DashboardController" fitToWidth="true" styleClass="tab-scroll">
+<VBox spacing="16" style="-fx-padding: 6 10 20 10;">
 
     <Label text="Business Overview" styleClass="section-title"/>
 
-    <Label text="SALES" styleClass="dashboard-group-label"/>
-    <HBox spacing="15">
-        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4" style="-fx-border-color: #101433; -fx-border-width: 0 0 0 4;">
-            <Label text="Total Orders" styleClass="stat-card-label"/>
-            <Label fx:id="totalOrdersLabel" text="0" styleClass="stat-card-value"/>
+    <HBox spacing="16">
+        <VBox styleClass="stat-card, hero-orange" alignment="CENTER_LEFT" spacing="4" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+            <Label text="TOTAL REVENUE (TK)" styleClass="stat-card-label"/>
+            <Label fx:id="totalRevenueLabel" text="0" styleClass="stat-card-value, hero-value"/>
+            <Label fx:id="totalRevenueUsdLabel" text="" styleClass="stat-card-label"/>
         </VBox>
-        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4" style="-fx-border-color: #101433; -fx-border-width: 0 0 0 4;">
-            <Label text="Total Revenue (Tk)" styleClass="stat-card-label"/>
-            <Label fx:id="totalRevenueLabel" text="0" styleClass="stat-card-value"/>
-            <Label fx:id="totalRevenueUsdLabel" text="" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
+        <VBox styleClass="stat-card, hero-navy" alignment="CENTER_LEFT" spacing="4" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+            <Label text="CAPITAL (TK)" styleClass="stat-card-label"/>
+            <Label fx:id="capitalLabel" text="0" styleClass="stat-card-value, hero-value"/>
+            <Label fx:id="capitalUsdLabel" text="" styleClass="stat-card-label"/>
         </VBox>
-        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4" style="-fx-border-color: #101433; -fx-border-width: 0 0 0 4;">
-            <Label text="Pending COD Orders" styleClass="stat-card-label"/>
-            <Label fx:id="pendingCodLabel" text="0" styleClass="stat-card-value"/>
+        <VBox styleClass="stat-card, hero-pink" alignment="CENTER_LEFT" spacing="4" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+            <Label text="LOW STOCK ALERTS (LIVE)" styleClass="stat-card-label"/>
+            <Label fx:id="lowStockLabel" text="checking..." styleClass="stat-card-value, hero-value"/>
         </VBox>
     </HBox>
 
-    <Label text="CUSTOMERS" styleClass="dashboard-group-label"/>
-    <HBox spacing="15">
-        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4" style="-fx-border-color: #101433; -fx-border-width: 0 0 0 4;">
+    <HBox spacing="16">
+        <VBox styleClass="stat-card, tile-yellow" alignment="CENTER_LEFT" spacing="4" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+            <Label text="Total Orders" styleClass="stat-card-label"/>
+            <Label fx:id="totalOrdersLabel" text="0" styleClass="stat-card-value"/>
+        </VBox>
+        <VBox styleClass="stat-card, tile-teal" alignment="CENTER_LEFT" spacing="4" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+            <Label text="Pending COD Orders" styleClass="stat-card-label"/>
+            <Label fx:id="pendingCodLabel" text="0" styleClass="stat-card-value"/>
+        </VBox>
+        <VBox styleClass="stat-card, tile-orange" alignment="CENTER_LEFT" spacing="4" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+            <Label text="Total Products" styleClass="stat-card-label"/>
+            <Label fx:id="totalProductsLabel" text="0" styleClass="stat-card-value"/>
+        </VBox>
+        <VBox styleClass="stat-card, tile-pink" alignment="CENTER_LEFT" spacing="4" HBox.hgrow="ALWAYS" maxWidth="Infinity">
             <Label text="Total Customers" styleClass="stat-card-label"/>
             <Label fx:id="totalCustomersLabel" text="0" styleClass="stat-card-value"/>
         </VBox>
-        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4" style="-fx-border-color: #101433; -fx-border-width: 0 0 0 4;">
-            <Label text="Best Customer (most orders)" styleClass="stat-card-label"/>
+        <VBox styleClass="stat-card, tile-navy" alignment="CENTER_LEFT" spacing="4" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+            <Label text="Best Customer" styleClass="stat-card-label"/>
             <Label fx:id="bestCustomerLabel" text="-" styleClass="stat-card-value" style="-fx-font-size: 15px;"/>
         </VBox>
     </HBox>
 
-    <Label text="INVENTORY" styleClass="dashboard-group-label"/>
-    <HBox spacing="15">
-        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4" style="-fx-border-color: #101433; -fx-border-width: 0 0 0 4;">
-            <Label text="Total Products" styleClass="stat-card-label"/>
-            <Label fx:id="totalProductsLabel" text="0" styleClass="stat-card-value"/>
+    <HBox spacing="16">
+        <VBox styleClass="stat-card" spacing="8" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+            <Label text="Compare: Revenue vs Capital vs Profit (Tk)" styleClass="stat-card-label"/>
+            <BarChart fx:id="comparisonChart" prefHeight="280" categoryGap="40" animated="false">
+                <xAxis><CategoryAxis label="Measure"/></xAxis>
+                <yAxis><NumberAxis label="Tk"/></yAxis>
+            </BarChart>
         </VBox>
-        <VBox styleClass="stat-card, stat-card-alert" alignment="CENTER_LEFT" spacing="4" style="-fx-border-color: #dc2626; -fx-border-width: 0 0 0 4;">
-            <Label text="Low Stock Alerts (live)" styleClass="stat-card-label"/>
-            <Label fx:id="lowStockLabel" text="checking..." styleClass="stat-card-value"/>
-        </VBox>
-    </HBox>
-
-    <Label text="FINANCE" styleClass="dashboard-group-label"/>
-    <HBox spacing="15">
-        <VBox styleClass="stat-card" alignment="CENTER_LEFT" spacing="4" style="-fx-border-color: #101433; -fx-border-width: 0 0 0 4;">
-            <Label text="Capital (Tk)" styleClass="stat-card-label"/>
-            <Label fx:id="capitalLabel" text="0" styleClass="stat-card-value"/>
-            <Label fx:id="capitalUsdLabel" text="" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
+        <VBox styleClass="stat-card" spacing="8" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+            <Label text="Monthly Profit - Sell price minus Buy price (stock not counted)" styleClass="stat-card-label"/>
+            <BarChart fx:id="monthlyProfitChart" prefHeight="280" categoryGap="40" animated="false">
+                <xAxis><CategoryAxis label="Month"/></xAxis>
+                <yAxis><NumberAxis label="Profit (Tk)"/></yAxis>
+            </BarChart>
         </VBox>
     </HBox>
-
-    <Label text="TRENDS" styleClass="dashboard-group-label"/>
-    <VBox styleClass="stat-card" spacing="8">
-        <Label text="Monthly Profit - Sell price minus Buy price (stock not counted)" styleClass="stat-card-label"/>
-        <BarChart fx:id="monthlyProfitChart" prefHeight="280" categoryGap="90" barGap="0" maxWidth="560" animated="false">
-            <xAxis><CategoryAxis label="Month"/></xAxis>
-            <yAxis><NumberAxis label="Profit (Tk)"/></yAxis>
-        </BarChart>
-    </VBox>
 
 </VBox>
 </ScrollPane>

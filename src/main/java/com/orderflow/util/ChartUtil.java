@@ -1,26 +1,72 @@
 package com.orderflow.util;
 
+import javafx.application.Platform;
+import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.util.StringConverter;
 
 import java.util.List;
 
-/** Small helper so every bar chart in the app doesn't end up as one flat, monotone block. */
+/** Small helper so every bar chart in the app doesn't end up as one flat, monotone orange block. */
 public class ChartUtil {
 
     private ChartUtil() { }
 
-    /** A varied, easy-to-tell-apart palette, tuned to sit with the app's indigo/slate identity instead of clashing against it. */
+    /** A varied, easy-to-tell-apart palette used across the app's charts. */
     private static final List<String> PALETTE = List.of(
-            "#4f46e5", // indigo (brand)
-            "#0ea5e9", // sky blue
-            "#14b8a6", // teal
-            "#f59e0b", // amber
-            "#ec4899", // rose
-            "#8b5cf6", // violet
-            "#10b981", // emerald
-            "#64748b"  // slate gray
+            "#e63946", // red
+            "#3a2e8f", // indigo
+            "#ffc82e", // yellow
+            "#00b8a3", // teal
+            "#9d4edd", // purple
+            "#2f80ed", // blue
+            "#2ecc71", // green
+            "#ff7f50", // coral
+            "#1d3557", // navy
+            "#e83e8c"  // pink
     );
+
+    private static final double MIN_CATEGORY_GAP = 12;
+
+    /**
+     * Stops bars from stretching across the whole chart when there are only
+     * a few of them. A BarChart has no "max bar width" setting, so this works
+     * it out from the axis width and the number of bars and adjusts the
+     * category gap to match - bars stay at most maxBarWidth wide and centred.
+     */
+    public static void limitBarWidth(BarChart<String, Number> chart, double maxBarWidth) {
+        Runnable update = () -> {
+            int bars = chart.getData().isEmpty() ? 0 : chart.getData().get(0).getData().size();
+            double axisWidth = chart.getXAxis().getWidth();
+            if (bars == 0 || axisWidth <= 0) return;
+            double gap = Math.max(MIN_CATEGORY_GAP, axisWidth / bars - maxBarWidth);
+            if (Math.abs(chart.getCategoryGap() - gap) > 0.5) {
+                chart.setCategoryGap(gap);
+            }
+        };
+        chart.getXAxis().widthProperty().addListener((obs, oldVal, newVal) -> update.run());
+        chart.getData().addListener((ListChangeListener<XYChart.Series<String, Number>>) change -> Platform.runLater(update));
+    }
+
+    /** Only label whole numbers on a value axis (units sold can't be 0.2 of a unit). */
+    public static void wholeNumberTicks(NumberAxis axis) {
+        axis.setMinorTickCount(0);
+        axis.setTickLabelFormatter(new StringConverter<Number>() {
+            @Override
+            public String toString(Number value) {
+                double d = value.doubleValue();
+                return d == Math.rint(d) ? String.valueOf((long) d) : "";
+            }
+
+            @Override
+            public Number fromString(String text) {
+                return text == null || text.isBlank() ? 0 : Double.parseDouble(text);
+            }
+        });
+    }
 
     /** Colors each bar in the series differently, cycling through the palette. */
     public static void colorizeCategorical(XYChart.Series<String, Number> series) {

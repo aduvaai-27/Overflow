@@ -19,7 +19,6 @@ public class ProductController {
     @FXML private TextField nameField;
     @FXML private TextField skuField;
     @FXML private ComboBox<Category> categoryCombo;
-    @FXML private ComboBox<Supplier> supplierCombo;
     @FXML private TextField purchasePriceField;
     @FXML private TextField sellingPriceField;
     @FXML private TextField stockQtyField;
@@ -32,6 +31,7 @@ public class ProductController {
     @FXML private TableColumn<Product, String> skuColumn;
     @FXML private TableColumn<Product, String> categoryColumn;
     @FXML private TableColumn<Product, String> supplierColumn;
+    @FXML private ComboBox<Supplier> supplierCombo;
     @FXML private TableColumn<Product, Double> purchasePriceColumn;
     @FXML private TableColumn<Product, Double> sellingPriceColumn;
     @FXML private TableColumn<Product, Integer> stockColumn;
@@ -53,7 +53,7 @@ public class ProductController {
         categoryColumn.setCellValueFactory(new PropertyValueFactory<>("categoryName"));
         supplierColumn.setCellValueFactory(cellData -> {
             String supplierName = cellData.getValue().getSupplierName();
-            return new javafx.beans.property.SimpleStringProperty(supplierName == null || supplierName.isBlank() ? "Unassigned" : supplierName);
+            return new javafx.beans.property.SimpleStringProperty(supplierName == null || supplierName.isBlank() ? "-" : supplierName);
         });
         purchasePriceColumn.setCellValueFactory(new PropertyValueFactory<>("purchasePrice"));
         sellingPriceColumn.setCellValueFactory(new PropertyValueFactory<>("sellingPrice"));
@@ -66,9 +66,9 @@ public class ProductController {
             return new javafx.beans.property.SimpleStringProperty(text);
         });
         TableColorUtil.colorizeText(statusColumn, value -> switch (value) {
-            case "OK" -> "#16a34a";
-            case "LOW STOCK" -> "#dc2626";
-            default -> "#64748b";
+            case "OK" -> "#2ecc71";
+            case "LOW STOCK" -> "#e74c3c";
+            default -> "#95a5a6";
         });
 
         categoryCombo.setItems(FXCollections.observableArrayList(categoryService.findAll()));
@@ -101,12 +101,10 @@ public class ProductController {
             }
         }
         supplierCombo.getSelectionModel().clearSelection();
-        if (p.getSupplierId() != null) {
-            for (Supplier s : supplierCombo.getItems()) {
-                if (s.getId() == p.getSupplierId()) {
-                    supplierCombo.getSelectionModel().select(s);
-                    break;
-                }
+        for (Supplier sup : supplierCombo.getItems()) {
+            if (sup.getId() == p.getSupplierId()) {
+                supplierCombo.getSelectionModel().select(sup);
+                break;
             }
         }
     }
@@ -117,11 +115,11 @@ public class ProductController {
         if (p == null) return;
 
         if (productService.add(p)) {
-            AlertUtil.info("Success", "Product added successfully.");
+            AlertUtil.info("Success", "Product added successfully.\nUnique ID: " + p.getSku());
             handleClear();
             refresh();
         } else {
-            AlertUtil.error("Error", "Could not add product. Check that the SKU is unique.");
+            AlertUtil.error("Error", "Could not add product. Check that the Unique ID is not already used.");
         }
     }
 
@@ -167,8 +165,8 @@ public class ProductController {
         stockQtyField.clear();
         minStockField.clear();
         categoryCombo.getSelectionModel().clearSelection();
-        supplierCombo.getSelectionModel().clearSelection();
         productTable.getSelectionModel().clearSelection();
+        supplierCombo.getSelectionModel().clearSelection();
     }
 
     @FXML
@@ -194,14 +192,13 @@ public class ProductController {
         Category category = categoryCombo.getValue();
         Supplier supplier = supplierCombo.getValue();
 
-        if (name.isEmpty() || sku.isEmpty() || category == null) {
-            AlertUtil.warn("Validation", "Name, SKU and Category are required.");
+        if (name.isEmpty() || category == null || supplier == null) {
+            AlertUtil.warn("Validation", "Name, Category and Supplier are required.");
             return null;
         }
-        if (supplier == null) {
-            AlertUtil.warn("Validation", "Choose which company owns this listing. "
-                    + "If the same item is sold by two companies, add it twice - once per supplier.");
-            return null;
+        // Every product must have a Unique ID: generate the next one if the field was left blank
+        if (sku.isEmpty()) {
+            sku = productService.generateUniqueId(category.getName());
         }
 
         double purchasePrice, sellingPrice;
@@ -221,7 +218,9 @@ public class ProductController {
         p.setName(name);
         p.setSku(sku);
         p.setCategoryId(category.getId());
+        p.setCategoryName(category.getName());
         p.setSupplierId(supplier.getId());
+        p.setSupplierName(supplier.getName());
         p.setPurchasePrice(purchasePrice);
         p.setSellingPrice(sellingPrice);
         p.setStockQty(stockQty);

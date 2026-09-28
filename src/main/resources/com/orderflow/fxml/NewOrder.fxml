@@ -1,85 +1,80 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Spinner?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.orderflow.controller.NewOrderController" spacing="15" prefWidth="640" prefHeight="560">
+<HBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.orderflow.controller.NewOrderController" spacing="16" prefWidth="1040" prefHeight="580">
 
     <padding>
         <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
 
-    <Label text="Create New Order" styleClass="section-title"/>
+    <VBox styleClass="panel" spacing="8" minWidth="300" prefWidth="300" maxWidth="300">
+        <Label text="New Order" styleClass="section-title"/>
+        <Label text="Customer" styleClass="field-label"/>
+        <ComboBox fx:id="customerCombo" maxWidth="Infinity"/>
+        <Label text="Payment Method" styleClass="field-label"/>
+        <ComboBox fx:id="paymentMethodCombo" maxWidth="Infinity"/>
+        <Label text="Add an item" styleClass="panel-title" style="-fx-padding: 12 0 0 0;"/>
+        <Label text="Supplier" styleClass="field-label"/>
+        <ComboBox fx:id="supplierCombo" promptText="Choose a supplier" maxWidth="Infinity"/>
+        <Label text="Product" styleClass="field-label"/>
+        <ComboBox fx:id="productCombo" promptText="Choose a product" maxWidth="Infinity"/>
+        <Label fx:id="productHintLabel" text="Choose a supplier to see its products." styleClass="hint-label" wrapText="true"/>
+        <VBox fx:id="productDetailBox" styleClass="panel" spacing="2" visible="false" managed="false">
+            <Label fx:id="detailIdLabel" styleClass="field-label"/>
+            <Label fx:id="detailPriceLabel" styleClass="field-label"/>
+            <Label fx:id="detailStockLabel" styleClass="hint-label"/>
+        </VBox>
+        <Label text="Quantity" styleClass="field-label"/>
+        <Spinner fx:id="qtySpinner" editable="true" maxWidth="Infinity"/>
+        <Button text="Add to Cart" styleClass="button-secondary" maxWidth="Infinity" onAction="#handleAddToCart"/>
+    </VBox>
 
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label text="Customer:"/>
-        <ComboBox fx:id="customerCombo" prefWidth="220" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
-    </HBox>
+    <VBox spacing="10" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+        <Label text="Cart" styleClass="panel-title"/>
+        <TableView fx:id="cartTable" VBox.vgrow="ALWAYS">
+            <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
+            <columns>
+                <TableColumn fx:id="skuColumn" text="Unique ID" prefWidth="90"/>
+                <TableColumn fx:id="productColumn" text="Product" prefWidth="170"/>
+                <TableColumn fx:id="supplierColumn" text="Supplier" prefWidth="170"/>
+                <TableColumn fx:id="qtyColumn" text="Qty" prefWidth="60"/>
+                <TableColumn fx:id="unitPriceColumn" text="Unit Price" prefWidth="100"/>
+                <TableColumn fx:id="lineTotalColumn" text="Line Total" prefWidth="100"/>
+            </columns>
+        </TableView>
 
-    <VBox spacing="8" styleClass="stat-card">
-        <HBox spacing="10" alignment="CENTER_LEFT">
-            <Label text="Supplier:"/>
-            <ComboBox fx:id="supplierCombo" prefWidth="220" promptText="Select a supplier"/>
-            <Label text="Product:"/>
-            <ComboBox fx:id="productCombo" prefWidth="220" promptText="Select a product"/>
-            <Label text="Qty:"/>
-            <Spinner fx:id="qtySpinner" prefWidth="80" editable="true"/>
-            <Button text="Add to Cart" styleClass="button-secondary" onAction="#handleAddToCart"/>
+        <HBox alignment="CENTER_RIGHT">
+            <Button text="Remove Selected Item" styleClass="button-link" onAction="#handleRemoveItem"/>
         </HBox>
-        <HBox spacing="24" alignment="CENTER_LEFT">
-            <Label fx:id="productHintLabel" text="Select a supplier to see only their products, or select a product to have its supplier filled in automatically." styleClass="stat-card-label" wrapText="true" maxWidth="420"/>
-            <Label fx:id="productCodeLabel" text="Product Code: —" styleClass="stat-card-label"/>
+
+        <HBox styleClass="stat-card, hero-navy" spacing="24" alignment="CENTER_LEFT">
+            <VBox spacing="2">
+                <Label text="SUBTOTAL (TK)" styleClass="stat-card-label"/>
+                <Label fx:id="subtotalLabel" text="0.00" styleClass="stat-card-value, hero-value" style="-fx-font-size: 18px;"/>
+            </VBox>
+            <VBox spacing="2">
+                <Label text="TAX (5%)" styleClass="stat-card-label"/>
+                <Label fx:id="taxLabel" text="0.00" styleClass="stat-card-value, hero-value" style="-fx-font-size: 18px;"/>
+            </VBox>
+            <VBox spacing="2">
+                <Label text="DELIVERY" styleClass="stat-card-label"/>
+                <Label fx:id="deliveryLabel" text="60.00" styleClass="stat-card-value, hero-value" style="-fx-font-size: 18px;"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <VBox spacing="2" alignment="CENTER_RIGHT">
+                <Label text="GRAND TOTAL (TK)" styleClass="stat-card-label"/>
+                <Label fx:id="totalLabel" text="0.00" styleClass="stat-card-value" style="-fx-font-size: 26px; -fx-text-fill: #ffc82e;"/>
+            </VBox>
+        </HBox>
+
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <Button text="Cancel" styleClass="button-secondary" onAction="#handleCancel"/>
+            <Button text="Confirm Order" styleClass="button-primary" onAction="#handleConfirm"/>
         </HBox>
     </VBox>
 
-    <TableView fx:id="cartTable" VBox.vgrow="ALWAYS">
-        <columns>
-            <TableColumn fx:id="productColumn" text="Product" prefWidth="220"/>
-            <TableColumn fx:id="qtyColumn" text="Qty" prefWidth="60"/>
-            <TableColumn fx:id="unitPriceColumn" text="Unit Price" prefWidth="100"/>
-            <TableColumn fx:id="lineTotalColumn" text="Line Total" prefWidth="100"/>
-        </columns>
-    </TableView>
-
-    <HBox spacing="10">
-        <Button text="Remove Selected Item" styleClass="button-danger" onAction="#handleRemoveItem"/>
-    </HBox>
-
-    <HBox spacing="20" alignment="CENTER_LEFT" styleClass="stat-card">
-        <VBox spacing="4">
-            <Label text="Subtotal (Tk):"/>
-            <Label fx:id="subtotalLabel" text="0.00" styleClass="stat-card-value"/>
-        </VBox>
-        <VBox spacing="4">
-            <Label text="Tax (5%):"/>
-            <Label fx:id="taxLabel" text="0.00" styleClass="stat-card-value"/>
-        </VBox>
-        <VBox spacing="4">
-            <Label text="Delivery Charge:"/>
-            <Label fx:id="deliveryLabel" text="60.00" styleClass="stat-card-value"/>
-        </VBox>
-        <VBox spacing="4">
-            <Label text="Grand Total (Tk):"/>
-            <Label fx:id="totalLabel" text="0.00" styleClass="stat-card-value"/>
-        </VBox>
-    </HBox>
-
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label text="Payment Method:"/>
-        <ComboBox fx:id="paymentMethodCombo" prefWidth="180"/>
-    </HBox>
-
-    <HBox spacing="10" alignment="CENTER_RIGHT">
-        <Button text="Cancel" styleClass="button-secondary" onAction="#handleCancel"/>
-        <Button text="Confirm Order" styleClass="button-primary" onAction="#handleConfirm"/>
-    </HBox>
-
-</VBox>
+</HBox>

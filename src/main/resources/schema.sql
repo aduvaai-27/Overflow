@@ -19,23 +19,17 @@ CREATE TABLE IF NOT EXISTS categories (
     name TEXT NOT NULL UNIQUE
 );
 
--- Every product row is owned by exactly ONE supplier - it is that company's
--- own listing (its own stock, its own price, its own SKU). Two companies
--- selling something with the same name (e.g. both sell a "Cotton T-Shirt")
--- are simply two separate product rows that happen to share a name; they
--- are never the same inventory line. supplier_id is nullable only for the
--- brief window before an owning supplier has been assigned on the Products page.
 CREATE TABLE IF NOT EXISTS products (
     id             INTEGER PRIMARY KEY AUTOINCREMENT,
     name           TEXT NOT NULL,
     sku            TEXT UNIQUE,
     category_id    INTEGER,
-    supplier_id    INTEGER,
     purchase_price REAL NOT NULL DEFAULT 0,
     selling_price  REAL NOT NULL DEFAULT 0,
     stock_qty      INTEGER NOT NULL DEFAULT 0,
     min_stock      INTEGER NOT NULL DEFAULT 5,
     active         INTEGER NOT NULL DEFAULT 1,        -- 1 = active, 0 = deactivated
+    supplier_id    INTEGER,                           -- the company this product is bought from
     FOREIGN KEY (category_id) REFERENCES categories(id),
     FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
 );
@@ -70,8 +64,10 @@ CREATE TABLE IF NOT EXISTS order_items (
     quantity   INTEGER NOT NULL,
     unit_price REAL NOT NULL,
     line_total REAL NOT NULL,
+    supplier_id INTEGER,
     FOREIGN KEY (order_id) REFERENCES orders(id),
-    FOREIGN KEY (product_id) REFERENCES products(id)
+    FOREIGN KEY (product_id) REFERENCES products(id),
+    FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
 );
 
 CREATE TABLE IF NOT EXISTS inventory_transactions (
@@ -141,40 +137,47 @@ VALUES (1, 'admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c
 
 -- Suppliers are seeded before categories, since categories reference them.
 INSERT OR IGNORE INTO suppliers (id, name, phone, email, address) VALUES
- (1, 'Dhaka Electronics Wholesale', '01910000001', 'sales@dhakaelectronics.example', 'Dhaka, Bangladesh'),
- (2, 'Khulna Garments Supply', '01910000002', 'info@khulnagarments.example', 'Khulna, Bangladesh'),
- (3, 'Rajshahi Textile Traders', '01910000003', 'info@rajshahitextile.example', 'Rajshahi, Bangladesh');
+ (1, 'Chattogram Tech Traders', '01920000001', 'sales@chattogramtech.example', 'Chattogram, Bangladesh'),
+ (2, 'Sylhet Fashion House', '01920000002', 'info@sylhetfashion.example', 'Sylhet, Bangladesh'),
+ (3, 'Barishal Cotton Mills', '01920000003', 'info@barishalcotton.example', 'Barishal, Bangladesh'),
+ (4, 'Rangpur Agro Foods', '01920000004', 'orders@rangpuragro.example', 'Rangpur, Bangladesh');
 
 INSERT OR IGNORE INTO categories (id, name) VALUES
- (1, 'Electronics'),
- (2, 'Clothing'),
- (3, 'Groceries'),
- (4, 'Accessories');
+ (1, 'Gadgets'),
+ (2, 'Fashion'),
+ (3, 'Food & Beverage'),
+ (4, 'Lifestyle');
 
--- Clothing is bought from two different companies, to show a category can have more than one supplier.
+-- Which categories each supplier covers (the "Categories Supplied" ticks on the Suppliers page).
+-- Fashion and Lifestyle are each covered by two companies, and every link has at least one product below.
 INSERT OR IGNORE INTO category_suppliers (category_id, supplier_id) VALUES
  (1, 1),
  (2, 2),
- (2, 3);
+ (2, 3),
+ (3, 4),
+ (4, 2),
+ (4, 3);
 
--- Note rows 3 and 8: both are named "Cotton T-Shirt" and both are Clothing,
--- but they are owned by two different suppliers, each with its own SKU,
--- price and stock - proof that the same product name can be sold by more
--- than one company as genuinely separate listings.
+-- Products are supplier-specific: each one is bought from exactly one supplier, so the same item from
+-- two suppliers is two separate products with their own Unique ID and price (see the two Polo Shirts).
+-- Unique IDs follow the same pattern the app generates: first 4 letters of the category + running number.
 INSERT OR IGNORE INTO products (id, name, sku, category_id, supplier_id, purchase_price, selling_price, stock_qty, min_stock, active) VALUES
- (1, 'Wireless Mouse', 'ELEC-001', 1, 1, 400, 650, 25, 5, 1),
- (2, 'Bluetooth Headphone', 'ELEC-002', 1, 1, 1200, 1899, 15, 5, 1),
- (3, 'Cotton T-Shirt', 'CLTH-001', 2, 2, 250, 499, 40, 10, 1),
- (4, 'Denim Jeans', 'CLTH-002', 2, 2, 800, 1299, 20, 5, 1),
- (5, 'Instant Noodles (Pack)', 'GROC-001', 3, NULL, 30, 55, 100, 20, 1),
- (6, 'Leather Wallet', 'ACC-001', 4, NULL, 350, 699, 8, 5, 1),
- (7, 'Phone Charger Cable', 'ELEC-003', 1, 1, 90, 199, 3, 10, 1),
- (8, 'Cotton T-Shirt', 'CLTH-003', 2, 3, 270, 549, 18, 8, 1);
+ (1, 'Wireless Keyboard', 'GADG-001', 1, 1, 900, 1450, 18, 5, 1),
+ (2, 'Bluetooth Speaker', 'GADG-002', 1, 1, 1500, 2299, 12, 5, 1),
+ (3, 'USB Power Bank', 'GADG-003', 1, 1, 700, 1150, 3, 10, 1),
+ (4, 'Polo Shirt', 'FASH-001', 2, 2, 300, 599, 35, 10, 1),
+ (5, 'Slim Fit Trousers', 'FASH-002', 2, 2, 700, 1199, 22, 5, 1),
+ (6, 'Polo Shirt', 'FASH-003', 2, 3, 280, 549, 28, 10, 1),
+ (7, 'Cotton Panjabi', 'FASH-004', 2, 3, 650, 1099, 15, 5, 1),
+ (8, 'Basmati Rice (5 kg)', 'FOOD-001', 3, 4, 520, 640, 60, 15, 1),
+ (9, 'Olive Oil (500 ml)', 'FOOD-002', 3, 4, 600, 780, 40, 10, 1),
+ (10, 'Canvas Backpack', 'LIFE-001', 4, 3, 450, 899, 9, 5, 1),
+ (11, 'Leather Wallet', 'LIFE-002', 4, 2, 350, 699, 8, 5, 1);
 
 INSERT OR IGNORE INTO customers (id, name, phone, email, address) VALUES
- (1, 'Rahim Uddin', '01710000001', 'rahim@example.com', 'Khulna, Bangladesh'),
- (2, 'Karim Hossain', '01710000002', 'karim@example.com', 'Dhaka, Bangladesh'),
- (3, 'Fatema Akter', '01710000003', 'fatema@example.com', 'Rajshahi, Bangladesh');
+ (1, 'Nasir Ahmed', '01810000001', 'nasir@example.com', 'Chattogram, Bangladesh'),
+ (2, 'Sumaiya Rahman', '01810000002', 'sumaiya@example.com', 'Sylhet, Bangladesh'),
+ (3, 'Tanvir Hasan', '01810000003', 'tanvir@example.com', 'Barishal, Bangladesh');
 
 INSERT OR IGNORE INTO capital_transactions (id, amount, source, reason, transaction_date) VALUES
- (1, 100000, 'Owner Investment', 'Opening capital', '2024-01-01T00:00:00');
+ (1, 150000, 'Owner Investment', 'Opening capital', '2024-01-01T00:00:00');

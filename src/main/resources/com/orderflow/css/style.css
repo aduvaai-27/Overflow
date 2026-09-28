@@ -1,280 +1,472 @@
-/* ==========================================================
-   OrderFlow palette v2 - "Indigo Ledger": a cool, modern identity,
-   swapped in wholesale from the original warm navy/clay scheme:
-     - ink      #101433  deep indigo-black (sidebar, headers, text)
-     - paper    #eef1f8  cool, light background (never warm cream)
-     - indigo   #4f46e5  brand accent - primary actions, active nav, logo
-     - red      #dc2626  reserved ONLY for real alerts/negative meaning
-   Cool slate-blue neutrals (grays with a hint of indigo) tie it together.
-   Chart series use a wider, distinct set (see .chart-bar / ChartUtil.java)
-   so bars are never confused with the brand accent alone.
-   ========================================================== */
-
 .root {
-    -fx-font-family: "Segoe UI", Arial, sans-serif;
-    -fx-background-color: #eef1f8;
-    -fx-font-size: 13px;
+    -fx-font-family: "Candara", "Trebuchet MS", "Verdana", sans-serif;
+    -fx-background-color: #fff5f5;
+    -fx-font-size: 14px;
+    -fx-accent: #e63946;
+    -fx-focus-color: #e63946;
+    -fx-faint-focus-color: transparent;
 }
 
 .login-pane {
-    -fx-background-color: #101433;
+    -fx-background-color: #1f1b4d;
 }
 
 .login-card {
-    -fx-background-color: #ffffff;
-    -fx-background-radius: 6;
-    -fx-padding: 32;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 14, 0, 0, 5);
+    -fx-background-color: white;
+    -fx-background-radius: 22;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 26, 0, 0, 10);
+}
+
+.login-brand {
+    -fx-background-color: #e63946;
+    -fx-background-radius: 22 0 0 22;
+    -fx-padding: 30;
+}
+
+.login-form {
+    -fx-padding: 36 40 36 40;
 }
 
 .login-logo {
-    -fx-effect: dropshadow(gaussian, rgba(79,70,229,0.45), 10, 0, 0, 3);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 4);
+}
+
+.login-brand-title {
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.login-brand-tag {
+    -fx-font-size: 14px;
+    -fx-text-fill: #ffe1e3;
+    -fx-text-alignment: center;
 }
 
 .login-title {
-    -fx-font-size: 22px;
+    -fx-font-size: 24px;
     -fx-font-weight: bold;
-    -fx-text-fill: #101433;
+    -fx-text-fill: #1f1b4d;
 }
 
 .login-subtitle {
     -fx-font-size: 12px;
-    -fx-text-fill: #64748b;
+    -fx-text-fill: #6f6a8a;
 }
 
-.sidebar {
-    -fx-background-color: #101433;
-    -fx-padding: 18 12 18 12;
-    -fx-pref-width: 205;
+.app-header {
+    -fx-background-color: #e63946;
+    -fx-padding: 10 24 10 24;
 }
 
-.sidebar-logo-row {
-    -fx-padding: 0 0 4 4;
-}
-
-.sidebar-title {
-    -fx-text-fill: #eef1f8;
-    -fx-font-size: 17px;
+.brand-title {
+    -fx-text-fill: white;
+    -fx-font-size: 20px;
     -fx-font-weight: bold;
 }
 
-.sidebar-subtitle {
-    -fx-text-fill: #97a0c3;
-    -fx-font-size: 10px;
-    -fx-padding: 0 0 20 6;
+.top-bar-title {
+    -fx-background-color: #1f1b4d;
+    -fx-background-radius: 20;
+    -fx-text-fill: #ffc82e;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 5 16 5 16;
 }
 
-.nav-section-label {
-    -fx-text-fill: #7d87ab;
-    -fx-font-size: 10px;
+.welcome-label {
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+}
+
+.logout-button {
+    -fx-background-color: white;
+    -fx-text-fill: #e63946;
     -fx-font-weight: bold;
-    -fx-padding: 14 0 4 6;
+    -fx-padding: 6 18 6 18;
+    -fx-cursor: hand;
+    -fx-background-radius: 20;
+}
+
+.logout-button:hover {
+    -fx-background-color: #1f1b4d;
+    -fx-text-fill: white;
+}
+
+.dock-wrap {
+    -fx-background-color: #fff5f5;
+    -fx-padding: 6 0 8 0;
+}
+
+.dock {
+    -fx-background-color: #1f1b4d;
+    -fx-background-radius: 34;
+    -fx-padding: 8 14 8 14;
+    -fx-effect: dropshadow(gaussian, rgba(31,27,77,0.35), 12, 0, 0, 4);
 }
 
 .nav-button {
     -fx-background-color: transparent;
-    -fx-text-fill: #ced2ef;
-    -fx-alignment: CENTER_LEFT;
-    -fx-padding: 9 10 9 10;
+    -fx-text-fill: #d8d5f5;
+    -fx-text-alignment: center;
+    -fx-alignment: CENTER;
+    -fx-pref-width: 100;
+    -fx-padding: 6 4 6 4;
     -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-graphic-text-gap: 2;
     -fx-cursor: hand;
-    -fx-background-radius: 4;
+    -fx-background-radius: 22;
 }
 
 .nav-button:hover {
-    -fx-background-color: #1f2555;
+    -fx-background-color: #34307a;
+    -fx-text-fill: white;
 }
 
 .nav-button-active {
-    -fx-background-color: #4f46e5;
-    -fx-text-fill: #101433;
+    -fx-background-color: #ffc82e;
+    -fx-text-fill: #1f1b4d;
     -fx-font-weight: bold;
 }
 
-.logout-button {
-    -fx-background-color: #191d4a;
-    -fx-text-fill: #eef1f8;
-    -fx-alignment: CENTER;
-    -fx-padding: 7 16 7 16;
-    -fx-cursor: hand;
-    -fx-background-radius: 4;
-    -fx-border-color: #4f46e5;
-    -fx-border-width: 1;
-    -fx-border-radius: 4;
-}
-
-.logout-button:hover {
-    -fx-background-color: #4f46e5;
-    -fx-text-fill: #101433;
-    -fx-border-color: #4f46e5;
-}
-
-.top-bar {
-    -fx-background-color: #ffffff;
-    -fx-padding: 14 24 14 24;
-    -fx-border-color: transparent transparent #101433 transparent;
-    -fx-border-width: 0 0 2 0;
-}
-
-.top-bar-title {
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #101433;
+.footer-text {
+    -fx-text-fill: #a39cc0;
+    -fx-font-size: 10px;
 }
 
 .content-pane {
-    -fx-background-color: #eef1f8;
-    -fx-padding: 24;
+    -fx-background-color: #fff5f5;
+    -fx-padding: 20 26 8 26;
 }
 
 .section-title {
-    -fx-font-size: 17px;
+    -fx-font-size: 20px;
     -fx-font-weight: bold;
-    -fx-text-fill: #101433;
-}
-
-.dashboard-group-label {
-    -fx-font-size: 11px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #4f46e5;
-    -fx-padding: 6 0 0 2;
+    -fx-text-fill: #1f1b4d;
 }
 
 .stat-card {
-    -fx-background-color: #ffffff;
-    -fx-background-radius: 4;
+    -fx-background-color: white;
+    -fx-background-radius: 14;
     -fx-padding: 16;
-    -fx-border-color: #dbe0f0;
-    -fx-border-width: 1;
-    -fx-border-radius: 4;
-    -fx-effect: dropshadow(gaussian, rgba(16,20,51,0.08), 5, 0, 0, 1);
-    -fx-min-width: 170;
+    -fx-border-color: transparent transparent #e63946 transparent;
+    -fx-border-width: 0 0 4 0;
+    -fx-border-radius: 14;
+    -fx-effect: dropshadow(gaussian, rgba(31,27,77,0.10), 8, 0, 0, 3);
+    -fx-min-width: 150;
 }
 
 .stat-card-value {
-    -fx-font-size: 21px;
+    -fx-font-size: 24px;
     -fx-font-weight: bold;
-    -fx-text-fill: #101433;
+    -fx-text-fill: #1f1b4d;
 }
 
 .stat-card-label {
     -fx-font-size: 12px;
-    -fx-text-fill: #64748b;
+    -fx-text-fill: #6f6a8a;
 }
 
-.stat-card-alert .stat-card-value {
-    -fx-text-fill: #dc2626;
+.hero-orange { -fx-background-color: #e63946; -fx-border-color: transparent transparent #b02a37 transparent; }
+.hero-navy   { -fx-background-color: #1f1b4d; -fx-border-color: transparent transparent #ffc82e transparent; }
+.hero-pink   { -fx-background-color: #7a1020; -fx-border-color: transparent transparent #4d0a15 transparent; }
+.hero-orange .stat-card-label, .hero-navy .stat-card-label, .hero-pink .stat-card-label {
+    -fx-text-fill: rgba(255,255,255,0.85);
+    -fx-font-weight: bold;
 }
+.hero-value { -fx-text-fill: white; -fx-font-size: 30px; }
+
+.tile-yellow { -fx-border-color: transparent transparent #ffc82e transparent; }
+.tile-teal   { -fx-border-color: transparent transparent #00b8a3 transparent; }
+.tile-orange { -fx-border-color: transparent transparent #e63946 transparent; }
+.tile-pink   { -fx-border-color: transparent transparent #9d4edd transparent; }
+.tile-navy   { -fx-border-color: transparent transparent #1f1b4d transparent; }
 
 .button-primary {
-    -fx-background-color: #4f46e5;
-    -fx-text-fill: #ffffff;
+    -fx-background-color: #e63946;
+    -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-background-radius: 4;
+    -fx-background-radius: 20;
     -fx-cursor: hand;
-    -fx-padding: 8 18 8 18;
+    -fx-padding: 8 22 8 22;
 }
 
 .button-primary:hover {
-    -fx-background-color: #4338ca;
+    -fx-background-color: #c92f3c;
 }
 
 .button-secondary {
-    -fx-background-color: #e8eaf7;
-    -fx-text-fill: #101433;
-    -fx-background-radius: 4;
+    -fx-background-color: white;
+    -fx-text-fill: #00907f;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20;
     -fx-cursor: hand;
-    -fx-padding: 8 18 8 18;
-    -fx-border-color: #cdd3ec;
-    -fx-border-width: 1;
-    -fx-border-radius: 4;
+    -fx-padding: 8 22 8 22;
+    -fx-border-color: #00b8a3;
+    -fx-border-width: 2;
+    -fx-border-radius: 20;
 }
 
 .button-secondary:hover {
-    -fx-background-color: #d7dbf3;
+    -fx-background-color: #00b8a3;
+    -fx-text-fill: white;
 }
 
 .button-danger {
-    -fx-background-color: #101433;
-    -fx-text-fill: #ffffff;
-    -fx-background-radius: 4;
+    -fx-background-color: #7a1020;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20;
     -fx-cursor: hand;
-    -fx-padding: 8 18 8 18;
+    -fx-padding: 8 22 8 22;
 }
 
 .button-danger:hover {
-    -fx-background-color: #dc2626;
+    -fx-background-color: #5c0b18;
+}
+
+.text-field, .combo-box, .date-picker, .spinner {
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
 }
 
 .table-view {
-    -fx-background-color: #ffffff;
-    -fx-background-radius: 4;
+    -fx-background-color: white;
+    -fx-background-radius: 14;
+    -fx-border-color: #f3dcdc;
+    -fx-border-width: 1;
+    -fx-border-radius: 14;
 }
 
 .table-view .column-header-background {
-    -fx-background-color: #101433;
-    -fx-background-radius: 4 4 0 0;
+    -fx-background-color: #1f1b4d;
+    -fx-background-radius: 14 14 0 0;
 }
 
-.table-view .column-header-background .label {
-    -fx-text-fill: #eef1f8;
+.table-view .column-header {
+    -fx-background-color: #1f1b4d;
+    -fx-border-color: #34307a;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #ffc82e;
     -fx-font-weight: bold;
     -fx-font-size: 12px;
 }
 
+.table-row-cell:odd {
+    -fx-background-color: #fffafa;
+}
+
+.table-row-cell:filled:selected {
+    -fx-background-color: #ffdadd;
+    -fx-text-background-color: #1f1b4d;
+}
+
 .low-stock-badge {
-    -fx-text-fill: #dc2626;
+    -fx-text-fill: #7a1020;
     -fx-font-weight: bold;
 }
 
 .error-label {
-    -fx-text-fill: #dc2626;
+    -fx-text-fill: #7a1020;
     -fx-font-size: 12px;
 }
 
-.sidebar-credit {
-    -fx-text-fill: #7d87ab;
-    -fx-font-size: 9px;
-    -fx-padding: 10 0 0 6;
+.nav-icon {
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
 }
 
-/* ----------------------------------------------------------
-   Charts (Dashboard / Reports bar charts). Individual bars get
-   their real fill color from ChartUtil.java at runtime; this
-   just re-themes everything around them (background, gridlines,
-   axes, legend) so the chart reads as part of the app instead
-   of JavaFX's default blue/orange Modena look. Bars are also
-   capped narrower via categoryGap/barGap/maxWidth in the FXML.
-   ---------------------------------------------------------- */
+.header-nav {
+    -fx-background-color: rgba(255,255,255,0.18);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 12.5px;
+    -fx-background-radius: 18;
+    -fx-padding: 5 12 5 8;
+    -fx-graphic-text-gap: 5;
+    -fx-cursor: hand;
+}
+
+.header-nav:hover {
+    -fx-background-color: rgba(255,255,255,0.32);
+}
+
+.header-nav.nav-button-active {
+    -fx-background-color: #ffc82e;
+    -fx-text-fill: #1f1b4d;
+}
+
+.nav-icon-small {
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.page-subtitle {
+    -fx-font-size: 12px;
+    -fx-text-fill: #6f6a8a;
+}
+
+.panel {
+    -fx-background-color: white;
+    -fx-background-radius: 14;
+    -fx-padding: 16;
+    -fx-border-color: #f3dcdc;
+    -fx-border-width: 1;
+    -fx-border-radius: 14;
+    -fx-effect: dropshadow(gaussian, rgba(31,27,77,0.08), 8, 0, 0, 3);
+}
+
+.panel-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1f1b4d;
+}
+
+.field-label {
+    -fx-font-size: 11.5px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6f6a8a;
+}
+
+.hint-label {
+    -fx-font-size: 12px;
+    -fx-font-style: italic;
+    -fx-text-fill: #8a84a8;
+}
+
+.button-link {
+    -fx-background-color: transparent;
+    -fx-text-fill: #e63946;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 8 10 8 10;
+}
+
+.button-link:hover {
+    -fx-underline: true;
+}
+
+.tab-scroll {
+    /* NOT "transparent": JavaFX derives default text/tick/checkmark colours from
+       -fx-background, and a transparent value makes it pick WHITE text - which was
+       invisible on the pale page (chart axes, checkbox ticks and labels). */
+    -fx-background: #fff5f5;
+    -fx-background-color: transparent;
+}
+
+.tab-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.tab-pane > .tab-header-area {
+    -fx-padding: 0 0 0 0;
+}
+
+.tab-pane .tab {
+    -fx-background-color: #f3dcdc;
+    -fx-background-radius: 10 10 0 0;
+    -fx-padding: 6 20 6 20;
+}
+
+.tab-pane .tab .tab-label {
+    -fx-text-fill: #1f1b4d;
+    -fx-font-weight: bold;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: #e63946;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: white;
+}
+
+.tab-pane > .tab-content-area {
+    -fx-background-color: transparent;
+}
+
+
+/* ---------- Charts: always-visible axes, light grid, tidy bars ---------- */
 .chart {
-    -fx-padding: 6;
+    -fx-padding: 8 14 8 8;
 }
 
 .chart-plot-background {
     -fx-background-color: transparent;
 }
 
-.chart-vertical-grid-lines, .chart-horizontal-grid-lines {
-    -fx-stroke: #dbe0f0;
+.chart-horizontal-grid-lines {
+    -fx-stroke: #f0e3e3;
 }
 
-.chart-alternative-row-fill {
-    -fx-fill: transparent;
+.chart-vertical-grid-lines {
     -fx-stroke: transparent;
 }
 
-.axis {
-    -fx-tick-label-fill: #64748b;
+.chart .axis {
+    -fx-tick-label-fill: #1f1b4d;
+    -fx-tick-label-font-size: 12px;
 }
 
-.axis-label {
-    -fx-text-fill: #101433;
+.chart .axis:bottom {
+    -fx-border-color: #b9b4d6 transparent transparent transparent;
 }
 
-.chart-legend {
-    -fx-background-color: transparent;
+.chart .axis:left {
+    -fx-border-color: transparent #b9b4d6 transparent transparent;
 }
 
-.default-color0.chart-bar {
-    -fx-bar-fill: #4f46e5;
+.chart .axis-label {
+    -fx-text-fill: #6f6a8a;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.chart .axis-tick-mark,
+.chart .axis-minor-tick-mark {
+    -fx-stroke: #b9b4d6;
+}
+
+.bar-chart .chart-bar {
+    -fx-background-color: -fx-bar-fill;
+    -fx-background-insets: 0;
+    -fx-background-radius: 6 6 0 0;
+}
+
+/* ---------- Check boxes: visible box, label and tick on the pale page ---------- */
+.check-box {
+    -fx-text-fill: #1f1b4d;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+}
+
+.check-box .box {
+    -fx-background-color: white;
+    -fx-background-radius: 5;
+    -fx-background-insets: 0;
+    -fx-border-color: #8f89b0;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 5;
+}
+
+.check-box:hover .box {
+    -fx-border-color: #e63946;
+}
+
+.check-box:selected .box {
+    -fx-background-color: #e63946;
+    -fx-border-color: #e63946;
+}
+
+.check-box .mark {
+    -fx-background-color: white;
 }

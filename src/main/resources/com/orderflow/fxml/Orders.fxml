@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.Tooltip?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.orderflow.controller.OrderController" spacing="15">
+      fx:controller="com.orderflow.controller.OrderController" spacing="12">
 
-    <Label text="Order Management" styleClass="section-title"/>
-
-    <HBox spacing="10">
+    <HBox alignment="CENTER_LEFT" spacing="10">
+        <VBox spacing="2">
+            <Label text="Orders" styleClass="section-title"/>
+            <Label text="Track every sale from confirmation to completion." styleClass="page-subtitle"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Refresh" styleClass="button-link" onAction="#handleRefresh"/>
         <Button text="+ New Order" styleClass="button-primary" onAction="#handleNewOrder"/>
+    </HBox>
+
+    <HBox styleClass="panel" spacing="10" alignment="CENTER_LEFT">
+        <Label text="Selected order:" styleClass="field-label"/>
         <Button text="View Invoice" styleClass="button-secondary" onAction="#handleViewInvoice"/>
         <Button text="Advance Status" styleClass="button-secondary" onAction="#handleAdvanceStatus"/>
         <Button fx:id="markPaidButton" text="Mark COD Collected" styleClass="button-secondary" onAction="#handleMarkPaid">
@@ -22,15 +25,16 @@
                 <Tooltip text="Enabled once the selected order is Delivered (or Completed) and not already Paid."/>
             </tooltip>
         </Button>
+        <Region HBox.hgrow="ALWAYS"/>
         <Button fx:id="cancelOrderButton" text="Cancel Order" styleClass="button-danger" onAction="#handleCancelOrder">
             <tooltip>
                 <Tooltip text="Enabled while the selected order hasn't shipped yet."/>
             </tooltip>
         </Button>
-        <Button text="Refresh" styleClass="button-secondary" onAction="#handleRefresh"/>
     </HBox>
 
     <TableView fx:id="orderTable" VBox.vgrow="ALWAYS">
+        <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
         <columns>
             <TableColumn fx:id="idColumn" text="Order #" prefWidth="70"/>
             <TableColumn fx:id="customerColumn" text="Customer" prefWidth="150"/>

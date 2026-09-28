@@ -32,6 +32,7 @@ public class DashboardController implements Disposable {
     @FXML private Label lowStockLabel;
     @FXML private Label pendingCodLabel;
     @FXML private BarChart<String, Number> monthlyProfitChart;
+    @FXML private BarChart<String, Number> comparisonChart;
 
     private final ProductService productService = new ProductService();
     private final CustomerService customerService = new CustomerService();
@@ -44,12 +45,16 @@ public class DashboardController implements Disposable {
 
     private double lastKnownRevenue;
     private double lastKnownCapital;
+    private double lastKnownProfit;
 
     @FXML
     public void initialize() {
         loadStats();
         monthlyProfitChart.setLegendVisible(false);
+        ChartUtil.limitBarWidth(monthlyProfitChart, 90);
+        ChartUtil.limitBarWidth(comparisonChart, 90);
         loadProfitChart();
+        loadComparisonChart();
         loadUsdEquivalents();
 
         // Poll every 8 seconds on a background thread; UI is updated safely via Platform.runLater
@@ -108,11 +113,24 @@ public class DashboardController implements Disposable {
         List<MonthlyProfit> monthly = orderService.monthlyProfit(PROFIT_CHART_MONTHS);
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Profit (Tk)");
+        lastKnownProfit = 0;
         for (MonthlyProfit mp : monthly) {
             series.getData().add(new XYChart.Data<>(mp.getMonth(), mp.getProfit()));
+            lastKnownProfit += mp.getProfit();
         }
         monthlyProfitChart.getData().setAll(series);
-        ChartUtil.colorizeByValue(series, "#16a34a", "#dc2626"); // green = profit, red = loss
+        ChartUtil.colorizeByValue(series, "#2ecc71", "#e74c3c"); // green = profit, red = loss
+    }
+
+    private void loadComparisonChart() {
+        comparisonChart.setLegendVisible(false);
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Tk");
+        series.getData().add(new XYChart.Data<>("Revenue", lastKnownRevenue));
+        series.getData().add(new XYChart.Data<>("Capital", lastKnownCapital));
+        series.getData().add(new XYChart.Data<>("Profit", lastKnownProfit));
+        comparisonChart.getData().setAll(series);
+        ChartUtil.colorizeCategorical(series);
     }
 
     @Override

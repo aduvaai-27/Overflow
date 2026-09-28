@@ -10,6 +10,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 public class ReportController {
 
     private static final int TOP_N = 6;
+    private static final double MAX_BAR_WIDTH = 90;
 
     @FXML private DatePicker fromDatePicker;
     @FXML private DatePicker toDatePicker;
@@ -59,6 +61,9 @@ public class ReportController {
 
         topSellingChart.setLegendVisible(false);
         topRevenueChart.setLegendVisible(false);
+        ChartUtil.limitBarWidth(topSellingChart, MAX_BAR_WIDTH);
+        ChartUtil.limitBarWidth(topRevenueChart, MAX_BAR_WIDTH);
+        ChartUtil.wholeNumberTicks((NumberAxis) topSellingChart.getYAxis());
 
         // Default range: last 30 days
         toDatePicker.setValue(LocalDate.now());

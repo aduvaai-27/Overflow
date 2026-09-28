@@ -1,11 +1,13 @@
 package com.orderflow.controller;
 
 import com.orderflow.business.CategoryService;
+import com.orderflow.model.CatalogRow;
 import com.orderflow.model.Category;
 import com.orderflow.util.AlertUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -19,8 +21,17 @@ public class CategoryController {
     @FXML private TableColumn<Category, String> suppliersColumn;
     @FXML private TextField nameField;
 
+    // Catalogue of the selected category: Supplier, Product, Price, Unique ID
+    @FXML private Label catalogTitleLabel;
+    @FXML private TableView<CatalogRow> catalogTable;
+    @FXML private TableColumn<CatalogRow, String> catSupplierColumn;
+    @FXML private TableColumn<CatalogRow, String> catProductColumn;
+    @FXML private TableColumn<CatalogRow, Double> catPriceColumn;
+    @FXML private TableColumn<CatalogRow, String> catSkuColumn;
+
     private final CategoryService categoryService = new CategoryService();
     private final ObservableList<Category> categoryList = FXCollections.observableArrayList();
+    private final ObservableList<CatalogRow> catalogList = FXCollections.observableArrayList();
     private Category selectedCategory;
 
     @FXML
@@ -32,12 +43,19 @@ public class CategoryController {
             return new javafx.beans.property.SimpleStringProperty(suppliers == null ? "-" : suppliers);
         });
 
+        catSupplierColumn.setCellValueFactory(new PropertyValueFactory<>("supplierName"));
+        catProductColumn.setCellValueFactory(new PropertyValueFactory<>("productName"));
+        catPriceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
+        catSkuColumn.setCellValueFactory(new PropertyValueFactory<>("sku"));
+        catalogTable.setItems(catalogList);
+
         categoryTable.setItems(categoryList);
         categoryTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
                 selectedCategory = newVal;
                 nameField.setText(newVal.getName());
             }
+            showCatalog(newVal);
         });
 
         refresh();
@@ -45,6 +63,18 @@ public class CategoryController {
 
     private void refresh() {
         categoryList.setAll(categoryService.findAll());
+        showCatalog(null);
+    }
+
+    /** Fills the Supplier / Product / Price / Unique ID table for the given category. */
+    private void showCatalog(Category category) {
+        if (category == null) {
+            catalogList.clear();
+            catalogTitleLabel.setText("Select a category to see its suppliers and products");
+            return;
+        }
+        catalogList.setAll(categoryService.findCatalog(category.getId()));
+        catalogTitleLabel.setText(category.getName() + " - suppliers and products");
     }
 
     @FXML

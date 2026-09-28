@@ -31,7 +31,7 @@ public class CapitalController {
     @FXML
     public void initialize() {
         amountColumn.setCellValueFactory(new PropertyValueFactory<>("amount"));
-        TableColorUtil.colorizeSignedNumber(amountColumn, "#16a34a", "#dc2626");
+        TableColorUtil.colorizeSignedNumber(amountColumn, "#2ecc71", "#e74c3c");
         sourceColumn.setCellValueFactory(new PropertyValueFactory<>("source"));
         reasonColumn.setCellValueFactory(new PropertyValueFactory<>("reason"));
         dateColumn.setCellValueFactory(cellData ->

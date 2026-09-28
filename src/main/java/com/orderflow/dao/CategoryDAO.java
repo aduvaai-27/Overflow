@@ -1,6 +1,7 @@
 package com.orderflow.dao;
 
 import com.orderflow.db.DatabaseConnection;
+import com.orderflow.model.CatalogRow;
 import com.orderflow.model.Category;
 
 import java.sql.*;
@@ -31,6 +32,33 @@ public class CategoryDAO {
             e.printStackTrace();
         }
         return list;
+    }
+
+    /**
+     * The catalogue of one category: every active product in it with the
+     * supplier it is bought from - Supplier, Product, Price, Unique ID.
+     * Products are supplier-specific, so the same item from two suppliers
+     * shows as two rows with their own Unique ID and price.
+     */
+    public List<CatalogRow> findCatalog(int categoryId) {
+        List<CatalogRow> rows = new ArrayList<>();
+        String sql = "SELECT COALESCE(s.id, 0) AS supplier_id, COALESCE(s.name, '-') AS supplier_name, " +
+                     "p.id AS product_id, p.name AS product_name, p.sku AS sku, p.selling_price AS price " +
+                     "FROM products p LEFT JOIN suppliers s ON p.supplier_id = s.id " +
+                     "WHERE p.category_id = ? AND p.active = 1 ORDER BY supplier_name, p.name";
+        try (PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement(sql)) {
+            ps.setInt(1, categoryId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    rows.add(new CatalogRow(rs.getInt("supplier_id"), rs.getString("supplier_name"),
+                            rs.getInt("product_id"), rs.getString("product_name"),
+                            rs.getString("sku"), rs.getDouble("price")));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return rows;
     }
 
     public boolean add(String name) {

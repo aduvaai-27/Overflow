@@ -41,13 +41,10 @@ public class DatabaseConnection {
                 // safe on an existing database too and lets new tables
                 // (e.g. suppliers, capital_transactions) appear for
                 // installs that were created before those features existed.
+                // (also runs the column migrations - CREATE TABLE IF NOT EXISTS
+                // won't add a new column to a table from an older version of the
+                // app, so those need an explicit, safe-to-repeat migration step)
                 initializeSchema();
-
-                // CREATE TABLE IF NOT EXISTS won't add a *new column* to a
-                // table that already exists from an older version of the
-                // app, so any column added after the table itself existed
-                // needs an explicit, safe-to-repeat migration here.
-                runMigrations();
             }
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
@@ -64,21 +61,55 @@ public class DatabaseConnection {
     private static void initializeSchema() {
         try {
             String sql = readSchemaFile();
-            try (Statement st = connection.createStatement()) {
-                // Strip full-line "--" comments first, then split on ";". Doing the
-                // split without stripping comments is fragile: a semicolon inside a
-                // comment (e.g. "-- do X; then Y") would be mistaken for the end of
-                // a real SQL statement and corrupt everything that follows it.
-                String withoutComments = sql.replaceAll("(?m)^\\s*--.*$", "");
-                for (String rawStatement : withoutComments.split(";")) {
-                    String statement = rawStatement.trim();
-                    if (!statement.isEmpty()) {
-                        st.execute(statement);
-                    }
-                }
+            // Strip full-line "--" comments first, then split on ";". Doing the
+            // split without stripping comments is fragile: a semicolon inside a
+            // comment (e.g. "-- do X; then Y") would be mistaken for the end of
+            // a real SQL statement and corrupt everything that follows it.
+            String withoutComments = sql.replaceAll("(?m)^\\s*--.*$", "");
+            java.util.List<String> creates = new java.util.ArrayList<>();
+            java.util.List<String> seeds = new java.util.ArrayList<>();
+            for (String rawStatement : withoutComments.split(";")) {
+                String statement = rawStatement.trim();
+                if (statement.isEmpty()) continue;
+                (statement.regionMatches(true, 0, "INSERT", 0, 6) ? seeds : creates).add(statement);
             }
+
+            // Order matters for databases made by an older version of the app:
+            //   1) create any missing tables,
+            //   2) add any missing columns (e.g. products.supplier_id),
+            //   3) only then insert seed rows, which may use those new columns.
+            runAll(creates);
+            runMigrations();
+            runAll(seeds);
+            backfillProductSuppliers();
             System.out.println("OrderFlow database created and seeded successfully.");
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /** Runs each statement on its own, so one failing statement can't stop the rest. */
+    private static void runAll(java.util.List<String> statements) {
+        for (String statement : statements) {
+            try (Statement st = connection.createStatement()) {
+                st.execute(statement);
+            } catch (SQLException e) {
+                System.err.println("Schema statement failed: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Older databases had no supplier on a product (it was only implied by the
+     * category). Give every such product the first supplier of its category so
+     * it keeps working on the supplier-first New Order screen.
+     */
+    private static void backfillProductSuppliers() {
+        try (Statement st = connection.createStatement()) {
+            st.execute("UPDATE products SET supplier_id = " +
+                    "(SELECT MIN(cs.supplier_id) FROM category_suppliers cs WHERE cs.category_id = products.category_id) " +
+                    "WHERE supplier_id IS NULL");
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
@@ -90,6 +121,10 @@ public class DatabaseConnection {
      */
     private static void runMigrations() {
         ensureColumn("capital_transactions", "reason", "TEXT NOT NULL DEFAULT ''");
+        // Which supplier an order line was picked from (NULL for orders made before this existed)
+        ensureColumn("order_items", "supplier_id", "INTEGER");
+        // Which supplier a product is bought from (NULL only until backfilled)
+        ensureColumn("products", "supplier_id", "INTEGER");
         migrateLegacyCategorySupplier();
     }
 

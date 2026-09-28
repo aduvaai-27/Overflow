@@ -51,17 +51,17 @@ public class OrderController {
         paymentStatusColumn.setCellValueFactory(new PropertyValueFactory<>("paymentStatus"));
         orderStatusColumn.setCellValueFactory(new PropertyValueFactory<>("orderStatus"));
         TableColorUtil.colorizeText(paymentStatusColumn, value -> switch (value) {
-            case "Paid" -> "#16a34a";
-            case "Refunded" -> "#dc2626";
-            default -> "#d97706"; // Pending
+            case "Paid" -> "#2ecc71";
+            case "Refunded" -> "#e74c3c";
+            default -> "#e67e22"; // Pending
         });
         TableColorUtil.colorizeText(orderStatusColumn, value -> switch (value) {
-            case "Confirmed" -> "#2563eb";
-            case "Shipped" -> "#d97706";
-            case "Delivered" -> "#0d9488";
-            case "Completed" -> "#16a34a";
-            case "Cancelled" -> "#dc2626";
-            default -> "#64748b"; // Pending
+            case "Confirmed" -> "#3498db";
+            case "Shipped" -> "#e67e22";
+            case "Delivered" -> "#1abc9c";
+            case "Completed" -> "#2ecc71";
+            case "Cancelled" -> "#e74c3c";
+            default -> "#95a5a6"; // Pending
         });
 
         orderTable.setItems(orderList);
@@ -153,11 +153,14 @@ public class OrderController {
         sb.append("Customer   : ").append(order.getCustomerName()).append("\n");
         sb.append("Date       : ").append(order.getOrderDate()).append("\n");
         sb.append("------------------------------------------\n");
-        sb.append(String.format("%-20s %5s %8s %10s%n", "Product", "Qty", "Price", "Total"));
+        sb.append(String.format("%-20s %5s %8s %10s%n", "ID / Product", "Qty", "Price", "Total"));
         sb.append("------------------------------------------\n");
         for (OrderItem item : items) {
             sb.append(String.format("%-20s %5d %8.2f %10.2f%n",
                     trim(item.getProductName(), 20), item.getQuantity(), item.getUnitPrice(), item.getLineTotal()));
+            String supplier = item.getSupplierName() == null ? "-" : item.getSupplierName();
+            sb.append("  ID: ").append(item.getSku() == null ? "-" : item.getSku())
+              .append("  |  Supplier: ").append(trim(supplier, 22)).append("\n");
         }
         sb.append("------------------------------------------\n");
         sb.append(String.format("%-27s%10.2f%n", "Subtotal:", order.getSubtotal()));

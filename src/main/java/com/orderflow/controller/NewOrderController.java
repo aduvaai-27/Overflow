@@ -15,6 +15,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -30,12 +31,17 @@ public class NewOrderController {
     @FXML private ComboBox<Supplier> supplierCombo;
     @FXML private ComboBox<Product> productCombo;
     @FXML private Label productHintLabel;
-    @FXML private Label productCodeLabel;
+    @FXML private VBox productDetailBox;
+    @FXML private Label detailIdLabel;
+    @FXML private Label detailPriceLabel;
+    @FXML private Label detailStockLabel;
     @FXML private Spinner<Integer> qtySpinner;
     @FXML private ComboBox<String> paymentMethodCombo;
 
     @FXML private TableView<OrderItem> cartTable;
+    @FXML private TableColumn<OrderItem, String> skuColumn;
     @FXML private TableColumn<OrderItem, String> productColumn;
+    @FXML private TableColumn<OrderItem, String> supplierColumn;
     @FXML private TableColumn<OrderItem, Integer> qtyColumn;
     @FXML private TableColumn<OrderItem, Double> unitPriceColumn;
     @FXML private TableColumn<OrderItem, Double> lineTotalColumn;
@@ -54,41 +60,30 @@ public class NewOrderController {
     private List<Product> allActiveProducts = List.of();
     private boolean orderCreated = false;
 
-    // Guards against the supplier <-> product listeners re-triggering each other
-    // when one field is filled in programmatically as a result of the other.
-    private boolean syncingSelection = false;
-
     @FXML
     public void initialize() {
         customerCombo.setItems(FXCollections.observableArrayList(customerService.findAll()));
-        supplierCombo.setItems(FXCollections.observableArrayList(supplierService.findAll()));
+
+        // Step 1: pick the supplier. Step 2: pick from only that supplier's products.
         allActiveProducts = productService.findAllActive();
-
-        // Two ways to add an item, both valid:
-        //   1) Select a supplier first -> the product list narrows to only that
-        //      supplier's own listings.
-        //   2) Select a product first -> the full catalogue is shown, and once a
-        //      product is picked its owning supplier is filled in automatically,
-        //      so the supplier never has to be chosen by hand in this flow.
-        productCombo.setItems(FXCollections.observableArrayList(allActiveProducts));
-
-        supplierCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
-            if (syncingSelection) return;
-            filterProductsBySupplier(newVal);
-        });
-        productCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
-            if (syncingSelection) return;
-            handleProductPickedDirectly(newVal);
-        });
-
-        updateProductCodeLabel(null);
+        supplierCombo.setItems(FXCollections.observableArrayList(supplierService.findAll()));
+        productCombo.setCellFactory(list -> new ProductCell());
+        productCombo.setButtonCell(new ProductCell());
+        productCombo.setDisable(true);
+        supplierCombo.valueProperty().addListener((obs, oldVal, newVal) -> filterProductsBySupplier(newVal));
+        productCombo.valueProperty().addListener((obs, oldVal, newVal) -> showProductDetails(newVal));
 
         qtySpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 999, 1));
 
         paymentMethodCombo.setItems(FXCollections.observableArrayList("Cash on Delivery (COD)", "Card", "Mobile Banking"));
         paymentMethodCombo.getSelectionModel().selectFirst();
 
+        skuColumn.setCellValueFactory(new PropertyValueFactory<>("sku"));
         productColumn.setCellValueFactory(new PropertyValueFactory<>("productName"));
+        supplierColumn.setCellValueFactory(cell -> {
+            String name = cell.getValue().getSupplierName();
+            return new javafx.beans.property.SimpleStringProperty(name == null ? "-" : name);
+        });
         qtyColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         unitPriceColumn.setCellValueFactory(new PropertyValueFactory<>("unitPrice"));
         lineTotalColumn.setCellValueFactory(new PropertyValueFactory<>("lineTotal"));
@@ -97,74 +92,43 @@ public class NewOrderController {
         deliveryLabel.setText(String.format("%.2f", DELIVERY_CHARGE));
     }
 
-    /**
-     * Narrows the product list down to only the products owned by the chosen supplier.
-     * Runs only when the supplier is picked directly by the person (not when it was
-     * auto-filled after a product was chosen first - see handleProductPickedDirectly).
-     */
+    /** Narrows the product list to the products whose category is supplied by the chosen supplier. */
     private void filterProductsBySupplier(Supplier supplier) {
-        syncingSelection = true;
         productCombo.getSelectionModel().clearSelection();
-        syncingSelection = false;
-
         if (supplier == null) {
-            productCombo.setItems(FXCollections.observableArrayList(allActiveProducts));
-            productCombo.setDisable(false);
-            productCombo.setPromptText("Select a product");
-            productHintLabel.setText("Select a supplier to see only their products, or select a product to have its supplier filled in automatically.");
-            updateProductCodeLabel(null);
+            productCombo.setItems(FXCollections.observableArrayList());
+            productCombo.setDisable(true);
+            productHintLabel.setText("Choose a supplier to see its products.");
             return;
         }
         List<Product> filtered = allActiveProducts.stream()
-                .filter(p -> p.getSupplierId() != null && p.getSupplierId() == supplier.getId())
+                .filter(p -> p.getSupplierId() == supplier.getId())
                 .collect(Collectors.toList());
         productCombo.setItems(FXCollections.observableArrayList(filtered));
         productCombo.setDisable(filtered.isEmpty());
-        productCombo.setPromptText(filtered.isEmpty() ? "No products available" : "Select a product");
         productHintLabel.setText(filtered.isEmpty()
-                ? "No products are currently listed under " + supplier.getName() + "."
-                : filtered.size() + " product(s) available from " + supplier.getName() + ".");
-        updateProductCodeLabel(null);
+                ? "No products from " + supplier.getName() + " yet."
+                : filtered.size() + " product(s) from " + supplier.getName());
     }
 
-    /**
-     * Called when the person picks a product directly, before choosing a supplier.
-     * The product's own owning supplier is looked up and filled in automatically,
-     * so the person never has to also state the supplier name in this flow.
-     */
-    private void handleProductPickedDirectly(Product product) {
-        if (product == null) {
-            updateProductCodeLabel(null);
-            return;
-        }
-        updateProductCodeLabel(product);
-
-        Supplier currentSupplier = supplierCombo.getValue();
-        boolean alreadyMatches = currentSupplier != null && product.getSupplierId() != null
-                && currentSupplier.getId() == product.getSupplierId();
-        if (alreadyMatches) {
-            return; // came from the supplier-first flow already - nothing to sync
-        }
-
-        Supplier owner = supplierCombo.getItems().stream()
-                .filter(s -> product.getSupplierId() != null && s.getId() == product.getSupplierId())
-                .findFirst()
-                .orElse(null);
-
-        syncingSelection = true;
-        supplierCombo.setValue(owner);
-        syncingSelection = false;
-
-        productHintLabel.setText(owner != null
-                ? "Supplier auto-selected: " + owner.getName() + "."
-                : "This product has no assigned supplier yet, so it can't be purchased.");
+    private void showProductDetails(Product product) {
+        boolean show = product != null;
+        productDetailBox.setVisible(show);
+        productDetailBox.setManaged(show);
+        if (!show) return;
+        detailIdLabel.setText("Unique ID: " + product.getSku());
+        detailPriceLabel.setText(String.format("Price: Tk %.2f", product.getSellingPrice()));
+        detailStockLabel.setText("In stock: " + product.getStockQty() + "  |  Category: " + product.getCategoryName());
     }
 
-    /** Shows the unique product code (SKU) for whichever product is currently selected. */
-    private void updateProductCodeLabel(Product product) {
-        productCodeLabel.setText(product == null
-                ? "Product Code: \u2014"
-                : "Product Code: " + product.getSku());
+    /** Dropdown row: "GADG-001  -  Wireless Keyboard  (Tk 1450.00)". */
+    private static class ProductCell extends ListCell<Product> {
+        @Override
+        protected void updateItem(Product p, boolean empty) {
+            super.updateItem(p, empty);
+            setText(empty || p == null ? null
+                    : String.format("%s  -  %s  (Tk %.2f)", p.getSku(), p.getName(), p.getSellingPrice()));
+        }
     }
 
     @FXML
@@ -173,27 +137,30 @@ public class NewOrderController {
         Product product = productCombo.getValue();
         int qty = qtySpinner.getValue();
 
-        if (product == null) {
-            AlertUtil.warn("Validation", "Please select a product to add.");
-            return;
-        }
         if (supplier == null) {
-            AlertUtil.warn("Validation", "This product has no supplier assigned yet, so it can't be purchased.");
+            AlertUtil.warn("Validation", "Please choose a supplier first.");
             return;
         }
-        if (qty > product.getStockQty()) {
-            AlertUtil.warn("Insufficient stock", "Only " + product.getStockQty() + " units of '" + product.getName() + "' are available.");
+        if (product == null) {
+            AlertUtil.warn("Validation", "Please choose a product.");
             return;
         }
 
-        // If the product is already in the cart, just increase its quantity
+        // Stock belongs to the product, so count what is already in the cart for it under any supplier.
+        int alreadyInCart = cart.stream()
+                .filter(i -> i.getProductId() == product.getId())
+                .mapToInt(OrderItem::getQuantity).sum();
+        if (alreadyInCart + qty > product.getStockQty()) {
+            AlertUtil.warn("Insufficient stock", "Only " + product.getStockQty() + " units of '" + product.getName()
+                    + "' (" + product.getSku() + ") are available"
+                    + (alreadyInCart > 0 ? " - " + alreadyInCart + " already in the cart." : "."));
+            return;
+        }
+
+        // Same product from the same supplier: just increase its quantity
         for (OrderItem item : cart) {
-            if (item.getProductId() == product.getId()) {
+            if (item.getProductId() == product.getId() && item.getSupplierId() == supplier.getId()) {
                 int newQty = item.getQuantity() + qty;
-                if (newQty > product.getStockQty()) {
-                    AlertUtil.warn("Insufficient stock", "Cannot add more than the available stock.");
-                    return;
-                }
                 item.setQuantity(newQty);
                 item.setLineTotal(newQty * item.getUnitPrice());
                 cartTable.refresh();
@@ -202,8 +169,8 @@ public class NewOrderController {
             }
         }
 
-        String displayName = product.getName() + "  \u2014  " + supplier.getName();
-        cart.add(new OrderItem(product.getId(), displayName, qty, product.getSellingPrice()));
+        cart.add(new OrderItem(product.getId(), product.getName(), product.getSku(),
+                supplier.getId(), supplier.getName(), qty, product.getSellingPrice()));
         recalcTotals();
     }
 

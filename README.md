@@ -7,13 +7,13 @@ I built OrderFlow as my order & inventory management project for a small online 
 ## Features I have implemented
 
 - I have implemented a Login screen, with the password stored as a SHA-256 hash in SQLite, not plain text.
-- I have implemented full CRUD for Categories and Products, with a minimum-stock level per product. If stock falls to or below that level, I show the product as LOW STOCK in the table and on the Dashboard.
+- I have implemented full CRUD for Categories and Products, with a minimum-stock level per product. If stock falls to or below that level, I show the product as LOW STOCK in the table and on the Dashboard. Every product belongs to one **supplier**, chosen on the product form, and has a **Unique ID**; if I leave the ID blank, the app generates the next free one from the category (for example `GADG-004`). Because products are supplier-specific, the same item bought from two suppliers is two products, each with its own ID and price. Selecting a category shows a catalogue table of **Supplier, Product, Price and Unique ID**, and I can't delete a supplier that still has products.
 - I have implemented a Suppliers module, where I can add suppliers, link them to the categories they supply, and send them restock requests. Each request moves through three phases: Requested → Shipped → Completed. When I mark one Completed, I automatically add the stock in and pay the supplier out of Capital.
 - I have implemented a Capital ledger, separate from sales revenue. I update it automatically when an order gets paid (adds the profit) or when a supplier request gets completed (subtracts the cost), and I can also add or withdraw capital manually with a reason.
 - I have implemented full CRUD and search for Customers, plus an order history view for each customer.
-- I have implemented an Orders module with a cart-style "New Order" screen. I pick a customer, add products with quantities, and the app works out subtotal, 5% tax, and delivery charge. When I confirm the order, I check stock availability, save the order and its items, reduce stock, and log an inventory transaction — all inside one database transaction, so nothing gets half-saved if something fails.
+- I have implemented an Orders module with a cart-style "New Order" screen. I pick a customer, then pick a **supplier** and then one of *that supplier's* products (the list shows each product's Unique ID and price), and add it with a quantity. The cart shows Unique ID, product and supplier, and the app works out subtotal, 5% tax, and delivery charge. When I confirm the order, I check stock availability, save the order and its items (including which supplier each line came from, shown on the invoice), reduce stock, and log an inventory transaction — all inside one database transaction, so nothing gets half-saved if something fails.
 - I have implemented order status tracking: Confirmed → Shipped → Delivered → Completed. I only allow a Cash-on-Delivery order to be marked Paid once it has actually been Delivered. I also allow cancelling an order before it ships, which automatically restores the stock and reverses the profit from Capital if it was already paid.
-- I have implemented a Reports page where I pick a date range and get order count, revenue, average order value, and two charts: best-selling product by quantity and highest revenue product.
+- I have implemented a Reports page where I pick a date range and get order count, revenue, average order value, and two bar charts: best-selling product by quantity (X axis = product, Y axis = units sold) and highest revenue product (X axis = product, Y axis = revenue in Tk).
 - I have implemented a Dashboard as the home page, showing live counters for products, customers, orders, revenue, capital, pending COD orders, a live low-stock counter, my best customer, and a monthly profit chart. I also show a live USD-equivalent figure under Revenue and Capital, fetched from a public exchange-rate API.
 
 ---
@@ -44,7 +44,7 @@ OrderFlow/
 │   ├── business/                  service layer I added between controllers and dao
 │   ├── service/                   StockAlertMonitor and ExchangeRateService
 │   ├── controller/                one controller per screen
-│   └── util/                      PasswordUtil, AlertUtil, Session, DateUtil, TableColorUtil
+│   └── util/                      PasswordUtil, AlertUtil, Session, DateUtil, TableColorUtil, ChartUtil
 └── src/main/resources/com/orderflow/
     ├── fxml/                      one layout file per screen
     └── css/style.css              all my styling

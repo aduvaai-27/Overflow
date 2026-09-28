@@ -1,6 +1,7 @@
 package com.orderflow.business;
 
 import com.orderflow.dao.CategoryDAO;
+import com.orderflow.model.CatalogRow;
 import com.orderflow.model.Category;
 
 import java.util.List;
@@ -11,6 +12,10 @@ public class CategoryService {
 
     public List<Category> findAll() {
         return categoryDAO.findAll();
+    }
+
+    public List<CatalogRow> findCatalog(int categoryId) {
+        return categoryDAO.findCatalog(categoryId);
     }
 
     public boolean add(String name) {

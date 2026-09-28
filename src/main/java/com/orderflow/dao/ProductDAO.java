@@ -23,27 +23,13 @@ public class ProductDAO {
         return query(SELECT_BASE + "ORDER BY p.name");
     }
 
-    /** Only the products owned by this exact supplier - what a "select supplier, then product" flow should offer. */
-    public List<Product> findAllActiveBySupplier(int supplierId) {
-        List<Product> list = new ArrayList<>();
-        String sql = SELECT_BASE + "WHERE p.active = 1 AND p.supplier_id = ? ORDER BY p.name";
-        try (PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement(sql)) {
-            ps.setInt(1, supplierId);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) list.add(map(rs));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
     public List<Product> search(String keyword) {
         List<Product> list = new ArrayList<>();
-        String sql = SELECT_BASE + "WHERE p.active = 1 AND (p.name LIKE ? OR p.sku LIKE ?) ORDER BY p.name";
+        String sql = SELECT_BASE + "WHERE p.active = 1 AND (p.name LIKE ? OR p.sku LIKE ? OR s.name LIKE ?) ORDER BY p.name";
         try (PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement(sql)) {
             ps.setString(1, "%" + keyword + "%");
             ps.setString(2, "%" + keyword + "%");
+            ps.setString(3, "%" + keyword + "%");
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) list.add(map(rs));
             }
@@ -65,19 +51,50 @@ public class ProductDAO {
         return 0;
     }
 
+    /**
+     * Builds the next free Unique ID for a category, e.g. "GADG-004".
+     * The prefix comes from the category name and the number continues from
+     * the highest one already used with that prefix, so IDs never repeat.
+     */
+    public String generateUniqueId(String categoryName) {
+        String letters = categoryName == null ? "" : categoryName.replaceAll("[^A-Za-z]", "").toUpperCase();
+        String prefix = letters.isEmpty() ? "PRD" : letters.substring(0, Math.min(4, letters.length()));
+        int max = 0;
+        String sql = "SELECT sku FROM products WHERE sku LIKE ?";
+        try (PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement(sql)) {
+            ps.setString(1, prefix + "-%");
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String sku = rs.getString("sku");
+                    try {
+                        max = Math.max(max, Integer.parseInt(sku.substring(prefix.length() + 1)));
+                    } catch (NumberFormatException | StringIndexOutOfBoundsException ignored) { }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return String.format("%s-%03d", prefix, max + 1);
+    }
+
     public boolean add(Product p) {
+        if (p.getSku() == null || p.getSku().isBlank()) {
+            p.setSku(generateUniqueId(p.getCategoryName()));
+        }
         String sql = "INSERT INTO products(name, sku, category_id, supplier_id, purchase_price, selling_price, stock_qty, min_stock, active) " +
                      "VALUES (?,?,?,?,?,?,?,?,1)";
         try (PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement(sql)) {
             ps.setString(1, p.getName());
             ps.setString(2, p.getSku());
             ps.setInt(3, p.getCategoryId());
-            setNullableInt(ps, 4, p.getSupplierId());
+            setSupplier(ps, 4, p.getSupplierId());
             ps.setDouble(5, p.getPurchasePrice());
             ps.setDouble(6, p.getSellingPrice());
             ps.setInt(7, p.getStockQty());
             ps.setInt(8, p.getMinStock());
-            return ps.executeUpdate() > 0;
+            boolean saved = ps.executeUpdate() > 0;
+            if (saved) linkSupplierToCategory(p);
+            return saved;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -91,26 +108,56 @@ public class ProductDAO {
             ps.setString(1, p.getName());
             ps.setString(2, p.getSku());
             ps.setInt(3, p.getCategoryId());
-            setNullableInt(ps, 4, p.getSupplierId());
+            setSupplier(ps, 4, p.getSupplierId());
             ps.setDouble(5, p.getPurchasePrice());
             ps.setDouble(6, p.getSellingPrice());
             ps.setInt(7, p.getStockQty());
             ps.setInt(8, p.getMinStock());
             ps.setInt(9, p.isActive() ? 1 : 0);
             ps.setInt(10, p.getId());
-            return ps.executeUpdate() > 0;
+            boolean saved = ps.executeUpdate() > 0;
+            if (saved) linkSupplierToCategory(p);
+            return saved;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
     }
 
-    private void setNullableInt(PreparedStatement ps, int index, Integer value) throws SQLException {
-        if (value == null) {
-            ps.setNull(index, Types.INTEGER);
-        } else {
-            ps.setInt(index, value);
+    private void setSupplier(PreparedStatement ps, int index, int supplierId) throws SQLException {
+        if (supplierId > 0) ps.setInt(index, supplierId);
+        else ps.setNull(index, Types.INTEGER);
+    }
+
+    /**
+     * Keeps the Suppliers page in sync: if a product is assigned to a supplier
+     * that isn't yet listed as supplying the product's category, that link is
+     * added, so "Categories Supplied" always matches what the supplier sells.
+     */
+    private void linkSupplierToCategory(Product p) {
+        if (p.getSupplierId() <= 0 || p.getCategoryId() <= 0) return;
+        String sql = "INSERT OR IGNORE INTO category_suppliers(category_id, supplier_id) VALUES (?,?)";
+        try (PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement(sql)) {
+            ps.setInt(1, p.getCategoryId());
+            ps.setInt(2, p.getSupplierId());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+    }
+
+    /** How many products (active or not) are bought from this supplier. */
+    public int countBySupplier(int supplierId) {
+        String sql = "SELECT COUNT(*) AS cnt FROM products WHERE supplier_id = ?";
+        try (PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement(sql)) {
+            ps.setInt(1, supplierId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt("cnt");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     /** Business rule from the spec: deactivate rather than hard-delete products with order history. */
@@ -193,8 +240,7 @@ public class ProductDAO {
                 rs.getInt("min_stock"),
                 rs.getInt("active") == 1
         );
-        int supplierId = rs.getInt("supplier_id");
-        p.setSupplierId(rs.wasNull() ? null : supplierId);
+        p.setSupplierId(rs.getInt("supplier_id")); // 0 when NULL
         p.setSupplierName(rs.getString("supplier_name"));
         return p;
     }

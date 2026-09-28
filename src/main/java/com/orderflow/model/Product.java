@@ -1,20 +1,14 @@
 package com.orderflow.model;
 
-/**
- * Represents a product that OrderFlow sells and keeps stock of.
- * Each product row is owned by exactly one supplier - its own listing, with
- * its own stock and price. Two companies selling the same-named item (e.g.
- * both selling a "Cotton T-Shirt") are two separate Product rows that just
- * happen to share a name.
- */
+/** Represents a product that OrderFlow sells and keeps stock of. */
 public class Product {
     private int id;
     private String name;
     private String sku;
     private int categoryId;
     private String categoryName;
-    private Integer supplierId;      // the one company this exact listing belongs to (nullable until assigned)
-    private String supplierName;     // derived, for display
+    private int supplierId;          // the company this product is bought from (0 = none yet)
+    private String supplierName;     // for display
     private double purchasePrice;
     private double sellingPrice;
     private int stockQty;
@@ -54,8 +48,8 @@ public class Product {
     public String getCategoryName() { return categoryName; }
     public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
 
-    public Integer getSupplierId() { return supplierId; }
-    public void setSupplierId(Integer supplierId) { this.supplierId = supplierId; }
+    public int getSupplierId() { return supplierId; }
+    public void setSupplierId(int supplierId) { this.supplierId = supplierId; }
 
     public String getSupplierName() { return supplierName; }
     public void setSupplierName(String supplierName) { this.supplierName = supplierName; }
@@ -76,5 +70,5 @@ public class Product {
     public void setActive(boolean active) { this.active = active; }
 
     @Override
-    public String toString() { return name + " (Stock: " + stockQty + ")"; }
+    public String toString() { return (sku == null || sku.isBlank() ? "" : sku + " - ") + name + " (Stock: " + stockQty + ")"; }
 }
