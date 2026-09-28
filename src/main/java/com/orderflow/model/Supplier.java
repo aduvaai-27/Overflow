@@ -6,7 +6,7 @@ public class Supplier extends BaseEntity {
     private String phone;
     private String email;
     private String address;
-    private String categoriesDisplay; // comma-separated category names this supplier provides, for display only
+    private String categoriesDisplay;
 
     public Supplier() {}
 

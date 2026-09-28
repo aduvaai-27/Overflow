@@ -1,9 +1,3 @@
--- ==========================================================
--- OrderFlow Database Schema (SQLite)
--- This file is executed automatically by DatabaseConnection.java
--- the first time the application runs (orderflow.db does not exist yet)
--- ==========================================================
-
 PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS users (
@@ -11,7 +5,7 @@ CREATE TABLE IF NOT EXISTS users (
     username      TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
     full_name     TEXT,
-    role          TEXT NOT NULL DEFAULT 'Staff'      -- Admin / Staff
+    role          TEXT NOT NULL DEFAULT 'Staff'
 );
 
 CREATE TABLE IF NOT EXISTS categories (
@@ -28,8 +22,8 @@ CREATE TABLE IF NOT EXISTS products (
     selling_price  REAL NOT NULL DEFAULT 0,
     stock_qty      INTEGER NOT NULL DEFAULT 0,
     min_stock      INTEGER NOT NULL DEFAULT 5,
-    active         INTEGER NOT NULL DEFAULT 1,        -- 1 = active, 0 = deactivated
-    supplier_id    INTEGER,                           -- the company this product is bought from
+    active         INTEGER NOT NULL DEFAULT 1,
+    supplier_id    INTEGER,
     FOREIGN KEY (category_id) REFERENCES categories(id),
     FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
 );
@@ -51,9 +45,9 @@ CREATE TABLE IF NOT EXISTS orders (
     tax              REAL NOT NULL DEFAULT 0,
     delivery_charge  REAL NOT NULL DEFAULT 0,
     total            REAL NOT NULL DEFAULT 0,
-    payment_method   TEXT NOT NULL DEFAULT 'COD',      -- COD / Card / Mobile Banking
-    payment_status   TEXT NOT NULL DEFAULT 'Pending',  -- Pending / Paid
-    order_status     TEXT NOT NULL DEFAULT 'Pending',  -- Pending/Confirmed/Shipped/Delivered/Cancelled
+    payment_method   TEXT NOT NULL DEFAULT 'COD',
+    payment_status   TEXT NOT NULL DEFAULT 'Pending',
+    order_status     TEXT NOT NULL DEFAULT 'Pending',
     FOREIGN KEY (customer_id) REFERENCES customers(id)
 );
 
@@ -73,8 +67,8 @@ CREATE TABLE IF NOT EXISTS order_items (
 CREATE TABLE IF NOT EXISTS inventory_transactions (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,
     product_id       INTEGER NOT NULL,
-    change_qty       INTEGER NOT NULL,     -- positive = stock in, negative = stock out
-    reason           TEXT NOT NULL,        -- Purchase / Order / Return / Adjustment
+    change_qty       INTEGER NOT NULL,
+    reason           TEXT NOT NULL,
     transaction_date TEXT NOT NULL,
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
@@ -87,9 +81,6 @@ CREATE TABLE IF NOT EXISTS suppliers (
     address TEXT
 );
 
--- A category can be supplied by more than one company (and a company can
--- supply more than one category) - e.g. clothing might be bought from two
--- different garment suppliers. This is set from the Suppliers page.
 CREATE TABLE IF NOT EXISTS category_suppliers (
     category_id INTEGER NOT NULL,
     supplier_id INTEGER NOT NULL,
@@ -98,44 +89,30 @@ CREATE TABLE IF NOT EXISTS category_suppliers (
     FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
 );
 
--- A request to a supplier to restock a product. Moves through phases:
--- Requested -> Shipped -> Completed. Only when it reaches Completed does
--- the app automatically increase product stock and decrease capital
--- (the business pays the supplier's bill on completion, COD-style).
 CREATE TABLE IF NOT EXISTS supplier_requests (
     id             INTEGER PRIMARY KEY AUTOINCREMENT,
     supplier_id    INTEGER NOT NULL,
     product_id     INTEGER NOT NULL,
     quantity       INTEGER NOT NULL,
     unit_cost      REAL NOT NULL,
-    phase          TEXT NOT NULL DEFAULT 'Requested',  -- Requested / Shipped / Completed
+    phase          TEXT NOT NULL DEFAULT 'Requested',
     request_date   TEXT NOT NULL,
     completed_date TEXT,
     FOREIGN KEY (supplier_id) REFERENCES suppliers(id),
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
--- A running ledger of the business's own money (capital), separate from
--- sales revenue. Positive amount = capital added; negative = capital spent.
--- Sale profit is added automatically when an order is paid; paying a
--- supplier on a completed restock request subtracts automatically.
 CREATE TABLE IF NOT EXISTS capital_transactions (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,
     amount           REAL NOT NULL,
-    source           TEXT NOT NULL,   -- where the money came from/went to, e.g. "Sales Profit", "Bank Loan"
-    reason           TEXT NOT NULL,   -- why, e.g. "Profit from Order #4", "Working capital top-up"
+    source           TEXT NOT NULL,
+    reason           TEXT NOT NULL,
     transaction_date TEXT NOT NULL
 );
-
--- ==========================================================
--- Seed data so the app is usable immediately after first run
--- Default login -> username: admin   password: admin123
--- ==========================================================
 
 INSERT OR IGNORE INTO users (id, username, password_hash, full_name, role)
 VALUES (1, 'admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'System Admin', 'Admin');
 
--- Suppliers are seeded before categories, since categories reference them.
 INSERT OR IGNORE INTO suppliers (id, name, phone, email, address) VALUES
  (1, 'Chattogram Tech Traders', '01920000001', 'sales@chattogramtech.example', 'Chattogram, Bangladesh'),
  (2, 'Sylhet Fashion House', '01920000002', 'info@sylhetfashion.example', 'Sylhet, Bangladesh'),
@@ -148,8 +125,6 @@ INSERT OR IGNORE INTO categories (id, name) VALUES
  (3, 'Food & Beverage'),
  (4, 'Lifestyle');
 
--- Which categories each supplier covers (the "Categories Supplied" ticks on the Suppliers page).
--- Fashion and Lifestyle are each covered by two companies, and every link has at least one product below.
 INSERT OR IGNORE INTO category_suppliers (category_id, supplier_id) VALUES
  (1, 1),
  (2, 2),
@@ -158,9 +133,6 @@ INSERT OR IGNORE INTO category_suppliers (category_id, supplier_id) VALUES
  (4, 2),
  (4, 3);
 
--- Products are supplier-specific: each one is bought from exactly one supplier, so the same item from
--- two suppliers is two separate products with their own Unique ID and price (see the two Polo Shirts).
--- Unique IDs follow the same pattern the app generates: first 4 letters of the category + running number.
 INSERT OR IGNORE INTO products (id, name, sku, category_id, supplier_id, purchase_price, selling_price, stock_qty, min_stock, active) VALUES
  (1, 'Wireless Keyboard', 'GADG-001', 1, 1, 900, 1450, 18, 5, 1),
  (2, 'Bluetooth Speaker', 'GADG-002', 1, 1, 1500, 2299, 12, 5, 1),

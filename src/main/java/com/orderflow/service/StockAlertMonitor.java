@@ -25,22 +25,16 @@ public class StockAlertMonitor implements BackgroundService {
     private final ProductDAO productDAO = new ProductDAO();
     private ScheduledExecutorService executor;
 
-    /**
-     * Starts the monitor. onUpdate is called (on the UI thread) every time
-     * a new low-stock count is available.
-     */
     public void start(IntConsumer onUpdate, int intervalSeconds) {
         executor = Executors.newScheduledThreadPool(2, runnable -> {
             Thread t = new Thread(runnable, "stock-alert-monitor-thread");
-            t.setDaemon(true); // dies automatically when the app closes
+            t.setDaemon(true);
             return t;
         });
 
         executor.scheduleAtFixedRate(() -> {
-            // --- runs on the background thread ---
             int lowStockCount = productDAO.countLowStock();
 
-            // --- hand the result back to the JavaFX UI thread ---
             Platform.runLater(() -> onUpdate.accept(lowStockCount));
 
         }, 0, intervalSeconds, TimeUnit.SECONDS);

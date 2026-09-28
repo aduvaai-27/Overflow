@@ -37,7 +37,6 @@ public class OrderController {
     private final OrderService orderService = new OrderService();
     private final ObservableList<Order> orderList = FXCollections.observableArrayList();
 
-    // Simplified linear lifecycle used by the "Advance Status" button.
     private static final List<String> STATUS_FLOW = List.of("Confirmed", "Shipped", "Delivered", "Completed");
 
     @FXML
@@ -53,7 +52,7 @@ public class OrderController {
         TableColorUtil.colorizeText(paymentStatusColumn, value -> switch (value) {
             case "Paid" -> "#2ecc71";
             case "Refunded" -> "#e74c3c";
-            default -> "#e67e22"; // Pending
+            default -> "#e67e22";
         });
         TableColorUtil.colorizeText(orderStatusColumn, value -> switch (value) {
             case "Confirmed" -> "#3498db";
@@ -61,7 +60,7 @@ public class OrderController {
             case "Delivered" -> "#1abc9c";
             case "Completed" -> "#2ecc71";
             case "Cancelled" -> "#e74c3c";
-            default -> "#95a5a6"; // Pending
+            default -> "#95a5a6";
         });
 
         orderTable.setItems(orderList);
@@ -71,11 +70,6 @@ public class OrderController {
         refresh();
     }
 
-    /**
-     * Rather than letting the user click an action and then showing a popup
-     * explaining why it isn't allowed, the buttons themselves are only
-     * enabled when the action is actually valid for the selected order.
-     */
     private void updateActionButtons(Order order) {
         if (order == null) {
             markPaidButton.setDisable(true);
@@ -113,7 +107,7 @@ public class OrderController {
             dialog.setScene(scene);
             dialog.showAndWait();
 
-            refresh(); // stock levels / new order may have changed
+            refresh();
         } catch (Exception e) {
             e.printStackTrace();
             AlertUtil.error("Error", "Could not open the New Order window.");
@@ -198,7 +192,6 @@ public class OrderController {
         String nextStatus = STATUS_FLOW.get(currentIndex + 1);
         orderService.updateOrderStatus(order.getId(), nextStatus);
 
-        // Business rule: COD payment becomes "Paid" once the order is delivered
         if (nextStatus.equals("Delivered") && "COD".equals(order.getPaymentMethod())) {
             orderService.markPaymentPaid(order.getId());
         }
@@ -210,8 +203,6 @@ public class OrderController {
     private void handleMarkPaid() {
         Order order = orderTable.getSelectionModel().getSelectedItem();
         if (order == null) return;
-        // The button is only enabled once the order is actually Delivered/Completed
-        // and not already Paid, so no extra popup is needed here.
         orderService.markPaymentPaid(order.getId());
         refresh();
     }
@@ -220,7 +211,6 @@ public class OrderController {
     private void handleCancelOrder() {
         Order order = orderTable.getSelectionModel().getSelectedItem();
         if (order == null) return;
-        // The button is only enabled while the order is still cancellable.
         if (AlertUtil.confirm("Cancel order", "Cancel order #" + order.getId() + "? Reserved stock will be returned.")) {
             if (!orderService.cancelOrder(order.getId())) {
                 AlertUtil.error("Error", "Could not cancel this order.");

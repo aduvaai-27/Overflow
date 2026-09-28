@@ -10,33 +10,25 @@ import javafx.util.StringConverter;
 
 import java.util.List;
 
-/** Small helper so every bar chart in the app doesn't end up as one flat, monotone orange block. */
 public class ChartUtil {
 
     private ChartUtil() { }
 
-    /** A varied, easy-to-tell-apart palette used across the app's charts. */
     private static final List<String> PALETTE = List.of(
-            "#e63946", // red
-            "#3a2e8f", // indigo
-            "#ffc82e", // yellow
-            "#00b8a3", // teal
-            "#9d4edd", // purple
-            "#2f80ed", // blue
-            "#2ecc71", // green
-            "#ff7f50", // coral
-            "#1d3557", // navy
-            "#e83e8c"  // pink
+            "#e63946",
+            "#3a2e8f",
+            "#ffc82e",
+            "#00b8a3",
+            "#9d4edd",
+            "#2f80ed",
+            "#2ecc71",
+            "#ff7f50",
+            "#1d3557",
+            "#e83e8c"
     );
 
     private static final double MIN_CATEGORY_GAP = 12;
 
-    /**
-     * Stops bars from stretching across the whole chart when there are only
-     * a few of them. A BarChart has no "max bar width" setting, so this works
-     * it out from the axis width and the number of bars and adjusts the
-     * category gap to match - bars stay at most maxBarWidth wide and centred.
-     */
     public static void limitBarWidth(BarChart<String, Number> chart, double maxBarWidth) {
         Runnable update = () -> {
             int bars = chart.getData().isEmpty() ? 0 : chart.getData().get(0).getData().size();
@@ -51,7 +43,6 @@ public class ChartUtil {
         chart.getData().addListener((ListChangeListener<XYChart.Series<String, Number>>) change -> Platform.runLater(update));
     }
 
-    /** Only label whole numbers on a value axis (units sold can't be 0.2 of a unit). */
     public static void wholeNumberTicks(NumberAxis axis) {
         axis.setMinorTickCount(0);
         axis.setTickLabelFormatter(new StringConverter<Number>() {
@@ -68,7 +59,6 @@ public class ChartUtil {
         });
     }
 
-    /** Colors each bar in the series differently, cycling through the palette. */
     public static void colorizeCategorical(XYChart.Series<String, Number> series) {
         int i = 0;
         for (XYChart.Data<String, Number> data : series.getData()) {
@@ -78,7 +68,6 @@ public class ChartUtil {
         }
     }
 
-    /** Colors each bar green if its value is >= 0, or red if it's negative (e.g. a profit/loss chart). */
     public static void colorizeByValue(XYChart.Series<String, Number> series, String positiveColor, String negativeColor) {
         for (XYChart.Data<String, Number> data : series.getData()) {
             double value = data.getYValue().doubleValue();
@@ -86,11 +75,6 @@ public class ChartUtil {
         }
     }
 
-    /**
-     * A chart's bar Node isn't created immediately when data is added to the
-     * series - JavaFX builds it during the next layout pass - so we style it
-     * once it actually appears.
-     */
     private static void applyColorWhenReady(XYChart.Data<String, Number> data, String hexColor) {
         Node node = data.getNode();
         if (node != null) {

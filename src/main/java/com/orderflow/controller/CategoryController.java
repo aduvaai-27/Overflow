@@ -21,7 +21,6 @@ public class CategoryController extends AbstractCrudController<Category> {
     @FXML private TableColumn<Category, String> suppliersColumn;
     @FXML private TextField nameField;
 
-    // Catalogue of the selected category: Supplier, Product, Price, Unique ID
     @FXML private Label catalogTitleLabel;
     @FXML private TableView<CatalogRow> catalogTable;
     @FXML private TableColumn<CatalogRow, String> catSupplierColumn;

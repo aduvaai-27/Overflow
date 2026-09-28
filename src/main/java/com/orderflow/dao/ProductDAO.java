@@ -39,7 +39,6 @@ public class ProductDAO {
         return list;
     }
 
-    /** Used by the background StockAlertMonitor thread (multithreading topic). */
     public int countLowStock() {
         String sql = "SELECT COUNT(*) AS cnt FROM products WHERE active = 1 AND stock_qty <= min_stock";
         try (Statement st = DatabaseConnection.getConnection().createStatement();
@@ -51,11 +50,6 @@ public class ProductDAO {
         return 0;
     }
 
-    /**
-     * Builds the next free Unique ID for a category, e.g. "GADG-004".
-     * The prefix comes from the category name and the number continues from
-     * the highest one already used with that prefix, so IDs never repeat.
-     */
     public String generateUniqueId(String categoryName) {
         String letters = categoryName == null ? "" : categoryName.replaceAll("[^A-Za-z]", "").toUpperCase();
         String prefix = letters.isEmpty() ? "PRD" : letters.substring(0, Math.min(4, letters.length()));
@@ -129,11 +123,6 @@ public class ProductDAO {
         else ps.setNull(index, Types.INTEGER);
     }
 
-    /**
-     * Keeps the Suppliers page in sync: if a product is assigned to a supplier
-     * that isn't yet listed as supplying the product's category, that link is
-     * added, so "Categories Supplied" always matches what the supplier sells.
-     */
     private void linkSupplierToCategory(Product p) {
         if (p.getSupplierId() <= 0 || p.getCategoryId() <= 0) return;
         String sql = "INSERT OR IGNORE INTO category_suppliers(category_id, supplier_id) VALUES (?,?)";
@@ -146,7 +135,6 @@ public class ProductDAO {
         }
     }
 
-    /** How many products (active or not) are bought from this supplier. */
     public int countBySupplier(int supplierId) {
         String sql = "SELECT COUNT(*) AS cnt FROM products WHERE supplier_id = ?";
         try (PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement(sql)) {
@@ -160,7 +148,6 @@ public class ProductDAO {
         return 0;
     }
 
-    /** Business rule from the spec: deactivate rather than hard-delete products with order history. */
     public boolean deactivate(int id) {
         String sql = "UPDATE products SET active = 0 WHERE id = ?";
         try (PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement(sql)) {
@@ -172,10 +159,6 @@ public class ProductDAO {
         }
     }
 
-    /**
-     * Adjusts stock by deltaQty (positive = add stock, negative = remove stock)
-     * and writes an inventory_transactions row so the change is traceable.
-     */
     public boolean adjustStock(int productId, int deltaQty, String reason) {
         Connection conn = DatabaseConnection.getConnection();
         String updateSql = "UPDATE products SET stock_qty = stock_qty + ? WHERE id = ?";
@@ -240,7 +223,7 @@ public class ProductDAO {
                 rs.getInt("min_stock"),
                 rs.getInt("active") == 1
         );
-        p.setSupplierId(rs.getInt("supplier_id")); // 0 when NULL
+        p.setSupplierId(rs.getInt("supplier_id"));
         p.setSupplierName(rs.getString("supplier_name"));
         return p;
     }

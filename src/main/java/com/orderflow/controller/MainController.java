@@ -27,8 +27,6 @@ public class MainController {
     @FXML private Button btnSuppliers;
     @FXML private Button btnReports;
 
-    // Keeps a reference to the currently displayed sub-controller so it
-    // can be cleaned up (e.g. stop background threads) before switching.
     private Object currentSubController;
 
     @FXML

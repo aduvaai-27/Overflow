@@ -1,11 +1,5 @@
 package com.orderflow.model;
 
-/**
- * A restock request sent to a supplier for a given product/quantity.
- * Moves through phases: Requested -> Shipped -> Completed. Reaching
- * Completed automatically increases the product's stock and pays the
- * supplier out of capital.
- */
 public class SupplierRequest {
     private int id;
     private int supplierId;

@@ -24,8 +24,8 @@ import java.util.stream.Collectors;
 
 public class NewOrderController {
 
-    private static final double TAX_RATE = 0.05;      // fixed 5% tax, kept simple for a student project
-    private static final double DELIVERY_CHARGE = 60;  // flat delivery charge
+    private static final double TAX_RATE = 0.05;
+    private static final double DELIVERY_CHARGE = 60;
 
     @FXML private ComboBox<Customer> customerCombo;
     @FXML private ComboBox<Supplier> supplierCombo;
@@ -64,7 +64,6 @@ public class NewOrderController {
     public void initialize() {
         customerCombo.setItems(FXCollections.observableArrayList(customerService.findAll()));
 
-        // Step 1: pick the supplier. Step 2: pick from only that supplier's products.
         allActiveProducts = productService.findAllActive();
         supplierCombo.setItems(FXCollections.observableArrayList(supplierService.findAll()));
         productCombo.setCellFactory(list -> new ProductCell());
@@ -92,7 +91,6 @@ public class NewOrderController {
         deliveryLabel.setText(String.format("%.2f", DELIVERY_CHARGE));
     }
 
-    /** Narrows the product list to the products whose category is supplied by the chosen supplier. */
     private void filterProductsBySupplier(Supplier supplier) {
         productCombo.getSelectionModel().clearSelection();
         if (supplier == null) {
@@ -121,7 +119,6 @@ public class NewOrderController {
         detailStockLabel.setText("In stock: " + product.getStockQty() + "  |  Category: " + product.getCategoryName());
     }
 
-    /** Dropdown row: "GADG-001  -  Wireless Keyboard  (Tk 1450.00)". */
     private static class ProductCell extends ListCell<Product> {
         @Override
         protected void updateItem(Product p, boolean empty) {
@@ -146,7 +143,6 @@ public class NewOrderController {
             return;
         }
 
-        // Stock belongs to the product, so count what is already in the cart for it under any supplier.
         int alreadyInCart = cart.stream()
                 .filter(i -> i.getProductId() == product.getId())
                 .mapToInt(OrderItem::getQuantity).sum();
@@ -157,7 +153,6 @@ public class NewOrderController {
             return;
         }
 
-        // Same product from the same supplier: just increase its quantity
         for (OrderItem item : cart) {
             if (item.getProductId() == product.getId() && item.getSupplierId() == supplier.getId()) {
                 int newQty = item.getQuantity() + qty;
@@ -221,7 +216,6 @@ public class NewOrderController {
         order.setDeliveryCharge(delivery);
         order.setTotal(total);
         order.setPaymentMethod(paymentMethod);
-        // COD stays "Pending" until delivery is completed; other methods are marked Paid immediately
         order.setPaymentStatus(paymentMethod.equals("COD") ? "Pending" : "Paid");
         order.setOrderStatus("Confirmed");
 

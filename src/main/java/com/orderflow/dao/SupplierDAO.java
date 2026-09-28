@@ -29,7 +29,6 @@ public class SupplierDAO {
         return list;
     }
 
-    /** Which categories (by id) this supplier is currently linked to. */
     public Set<Integer> findCategoryIdsForSupplier(int supplierId) {
         Set<Integer> ids = new HashSet<>();
         String sql = "SELECT category_id FROM category_suppliers WHERE supplier_id = ?";
@@ -44,7 +43,6 @@ public class SupplierDAO {
         return ids;
     }
 
-    /** Adds a new supplier and links it to the given categories, in one transaction. */
     public boolean add(Supplier s, Set<Integer> categoryIds) {
         Connection conn = DatabaseConnection.getConnection();
         try {
@@ -74,7 +72,6 @@ public class SupplierDAO {
         }
     }
 
-    /** Updates a supplier's details and replaces its category links, in one transaction. */
     public boolean update(Supplier s, Set<Integer> categoryIds) {
         Connection conn = DatabaseConnection.getConnection();
         try {
@@ -117,9 +114,7 @@ public class SupplierDAO {
     }
 
     public boolean delete(int id) {
-        // Products point at their supplier, so a supplier that still has products can't be removed.
         if (new ProductDAO().countBySupplier(id) > 0) return false;
-        // Past order lines keep existing; they just no longer point at this supplier.
         try (PreparedStatement psNull = DatabaseConnection.getConnection().prepareStatement(
                 "UPDATE order_items SET supplier_id = NULL WHERE supplier_id = ?")) {
             psNull.setInt(1, id);

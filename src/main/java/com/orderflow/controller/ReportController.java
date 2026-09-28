@@ -44,8 +44,8 @@ public class ReportController {
     @FXML private TableColumn<Order, Double> totalColumn;
     @FXML private TableColumn<Order, String> statusColumn;
 
-    @FXML private BarChart<String, Number> topSellingChart;   // highest selling product (to customers), by quantity
-    @FXML private BarChart<String, Number> topRevenueChart;   // highest revenue generating product
+    @FXML private BarChart<String, Number> topSellingChart;
+    @FXML private BarChart<String, Number> topRevenueChart;
 
     private final OrderService orderService = new OrderService();
     private final ObservableList<Order> reportList = FXCollections.observableArrayList();
@@ -67,7 +67,6 @@ public class ReportController {
         ChartUtil.limitBarWidth(topRevenueChart, MAX_BAR_WIDTH);
         ChartUtil.wholeNumberTicks((NumberAxis) topSellingChart.getYAxis());
 
-        // Default range: last 30 days
         toDatePicker.setValue(LocalDate.now());
         fromDatePicker.setValue(LocalDate.now().minusDays(30));
 

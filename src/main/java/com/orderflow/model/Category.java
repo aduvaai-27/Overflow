@@ -3,7 +3,7 @@ package com.orderflow.model;
 /** Represents a product category, e.g. Electronics, Clothing. */
 public class Category extends BaseEntity {
     private String name;
-    private String suppliersDisplay; // comma-separated supplier names, for display only (read-only, derived)
+    private String suppliersDisplay;
 
     public Category() {}
 

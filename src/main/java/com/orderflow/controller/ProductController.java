@@ -191,7 +191,6 @@ public class ProductController extends AbstractCrudController<Product> {
         refresh();
     }
 
-    /** Reads the form fields, validates them, and builds a Product object. Returns null if invalid. */
     private Product buildProductFromForm(Integer existingId) {
         String name = nameField.getText().trim();
         String sku = skuField.getText().trim();
@@ -202,7 +201,6 @@ public class ProductController extends AbstractCrudController<Product> {
             AlertUtil.warn("Validation", "Name, Category and Supplier are required.");
             return null;
         }
-        // Every product must have a Unique ID: generate the next one if the field was left blank
         if (sku.isEmpty()) {
             sku = productService.generateUniqueId(category.getName());
         }

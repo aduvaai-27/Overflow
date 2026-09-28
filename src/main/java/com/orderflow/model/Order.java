@@ -1,6 +1,5 @@
 package com.orderflow.model;
 
-/** Represents a customer order (header row); items live in OrderItem. */
 public class Order {
     private int id;
     private int customerId;

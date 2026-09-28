@@ -1,6 +1,5 @@
 package com.orderflow.model;
 
-/** One line of the category catalogue: which supplier provides which product, at what price, under which Unique ID. */
 public class CatalogRow {
     private final int supplierId;
     private final String supplierName;

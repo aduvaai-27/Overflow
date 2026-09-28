@@ -6,8 +6,8 @@ public class Product extends BaseEntity {
     private String sku;
     private int categoryId;
     private String categoryName;
-    private int supplierId;          // the company this product is bought from (0 = none yet)
-    private String supplierName;     // for display
+    private int supplierId;
+    private String supplierName;
     private double purchasePrice;
     private double sellingPrice;
     private int stockQty;

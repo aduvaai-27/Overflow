@@ -1,6 +1,5 @@
 package com.orderflow.model;
 
-/** Aggregated sales figures for one product, used by the Reports/Dashboard charts. */
 public class ProductSalesRow {
     private final String productName;
     private final int quantitySold;

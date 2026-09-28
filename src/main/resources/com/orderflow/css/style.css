@@ -352,9 +352,6 @@
 }
 
 .tab-scroll {
-    /* NOT "transparent": JavaFX derives default text/tick/checkmark colours from
-       -fx-background, and a transparent value makes it pick WHITE text - which was
-       invisible on the pale page (chart axes, checkbox ticks and labels). */
     -fx-background: #fff5f5;
     -fx-background-color: transparent;
 }
@@ -394,8 +391,6 @@
     -fx-background-color: transparent;
 }
 
-
-/* ---------- Charts: always-visible axes, light grid, tidy bars ---------- */
 .chart {
     -fx-padding: 8 14 8 8;
 }
@@ -442,7 +437,6 @@
     -fx-background-radius: 6 6 0 0;
 }
 
-/* ---------- Check boxes: visible box, label and tick on the pale page ---------- */
 .check-box {
     -fx-text-fill: #1f1b4d;
     -fx-font-size: 13px;

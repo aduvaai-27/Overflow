@@ -41,7 +41,6 @@ public class DashboardController implements Disposable {
     private final CapitalService capitalService = new CapitalService();
     private final ExchangeRateService exchangeRateService = new ExchangeRateService();
 
-    // Background thread that keeps the low-stock counter fresh (Multithreading topic)
     private final StockAlertMonitor stockAlertMonitor = new StockAlertMonitor();
 
     private double lastKnownRevenue;
@@ -58,7 +57,6 @@ public class DashboardController implements Disposable {
         loadComparisonChart();
         loadUsdEquivalents();
 
-        // Poll every 8 seconds on a background thread; UI is updated safely via Platform.runLater
         stockAlertMonitor.start(count -> {
             lowStockLabel.setText(String.valueOf(count));
         }, 8);
@@ -68,8 +66,6 @@ public class DashboardController implements Disposable {
         totalProductsLabel.setText(String.valueOf(productService.countActive()));
         totalCustomersLabel.setText(String.valueOf(customerService.countAll()));
         totalOrdersLabel.setText(String.valueOf(orderService.countAllOrders()));
-        // Revenue = total sales value. Capital = the business's own money on hand.
-        // These are intentionally two different numbers.
         lastKnownRevenue = orderService.totalRevenue();
         lastKnownCapital = capitalService.getCurrentCapital();
         totalRevenueLabel.setText(String.format("%.2f", lastKnownRevenue));
@@ -82,12 +78,6 @@ public class DashboardController implements Disposable {
                 : bestCustomer.getCustomerName() + " (" + bestCustomer.getOrderCount() + " orders)");
     }
 
-    /**
-     * Fetches the live USD/BDT rate in the background (JSON Parsing and API
-     * Response Handling topic) and, once it arrives, shows Total Revenue and
-     * Capital as an approximate USD figure too - useful context, and never
-     * blocks the rest of the Dashboard from loading while it's in flight.
-     */
     private void loadUsdEquivalents() {
         totalRevenueUsdLabel.setText("converting to USD...");
         capitalUsdLabel.setText("converting to USD...");
@@ -119,7 +109,7 @@ public class DashboardController implements Disposable {
             lastKnownProfit += mp.getProfit();
         }
         monthlyProfitChart.getData().setAll(series);
-        ChartUtil.colorizeByValue(series, "#2ecc71", "#e74c3c"); // green = profit, red = loss
+        ChartUtil.colorizeByValue(series, "#2ecc71", "#e74c3c");
     }
 
     private void loadComparisonChart() {

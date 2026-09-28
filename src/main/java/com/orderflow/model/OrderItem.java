@@ -1,13 +1,12 @@
 package com.orderflow.model;
 
-/** One line item inside an order (a product + quantity). */
 public class OrderItem {
     private int id;
     private int orderId;
     private int productId;
     private String productName;
-    private String sku;            // the product's Unique ID
-    private int supplierId;        // supplier the item was picked from (0 = unknown / older orders)
+    private String sku;
+    private int supplierId;
     private String supplierName;
     private int quantity;
     private double unitPrice;

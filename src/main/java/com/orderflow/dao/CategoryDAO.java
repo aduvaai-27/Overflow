@@ -8,12 +8,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Categories no longer pick a single supplier directly - which suppliers
- * provide a category is set from the Suppliers page (a supplier can supply
- * more than one category, and a category can be supplied by more than one
- * company). This DAO only reads that relationship back for display.
- */
 public class CategoryDAO {
 
     private static final String SELECT_BASE =
@@ -34,12 +28,6 @@ public class CategoryDAO {
         return list;
     }
 
-    /**
-     * The catalogue of one category: every active product in it with the
-     * supplier it is bought from - Supplier, Product, Price, Unique ID.
-     * Products are supplier-specific, so the same item from two suppliers
-     * shows as two rows with their own Unique ID and price.
-     */
     public List<CatalogRow> findCatalog(int categoryId) {
         List<CatalogRow> rows = new ArrayList<>();
         String sql = "SELECT COALESCE(s.id, 0) AS supplier_id, COALESCE(s.name, '-') AS supplier_name, " +
