@@ -1,8 +1,7 @@
 package com.orderflow.model;
 
 /** Represents a product that OrderFlow sells and keeps stock of. */
-public class Product {
-    private int id;
+public class Product extends BaseEntity {
     private String name;
     private String sku;
     private int categoryId;
@@ -19,7 +18,7 @@ public class Product {
 
     public Product(int id, String name, String sku, int categoryId, String categoryName,
                     double purchasePrice, double sellingPrice, int stockQty, int minStock, boolean active) {
-        this.id = id;
+        setId(id);
         this.name = name;
         this.sku = sku;
         this.categoryId = categoryId;
@@ -32,9 +31,6 @@ public class Product {
     }
 
     public boolean isLowStock() { return stockQty <= minStock; }
-
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -68,6 +64,9 @@ public class Product {
 
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
+
+    @Override
+    public String getDisplayName() { return name; }
 
     @Override
     public String toString() { return (sku == null || sku.isBlank() ? "" : sku + " - ") + name + " (Stock: " + stockQty + ")"; }

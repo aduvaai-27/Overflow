@@ -8,6 +8,7 @@ import com.orderflow.model.CustomerOrderCount;
 import com.orderflow.model.MonthlyProfit;
 import com.orderflow.service.ExchangeRateService;
 import com.orderflow.service.StockAlertMonitor;
+import com.orderflow.util.AppExecutor;
 import com.orderflow.util.ChartUtil;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -104,9 +105,8 @@ public class DashboardController implements Disposable {
             capitalUsdLabel.setText("USD rate unavailable");
         });
 
-        Thread apiThread = new Thread(rateTask, "exchange-rate-api-thread");
-        apiThread.setDaemon(true);
-        apiThread.start();
+        // Runs on the shared thread pool instead of creating a new Thread each time
+        AppExecutor.execute(rateTask);
     }
 
     private void loadProfitChart() {

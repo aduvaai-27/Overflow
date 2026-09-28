@@ -4,8 +4,10 @@ import com.orderflow.business.OrderService;
 import com.orderflow.model.Order;
 import com.orderflow.model.ProductSalesRow;
 import com.orderflow.util.AlertUtil;
+import com.orderflow.util.AppExecutor;
 import com.orderflow.util.ChartUtil;
 import com.orderflow.util.DateUtil;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -86,7 +88,19 @@ public class ReportController {
             return;
         }
 
-        List<Order> orders = orderService.findBetweenDates(from.toString(), to.toString());
+        final String fromText = from.toString();
+        final String toText = to.toString();
+
+        // Database queries run on the shared thread pool so the window never freezes;
+        // the finished results are handed back to the JavaFX thread with Platform.runLater.
+        AppExecutor.execute(() -> {
+            List<Order> orders = orderService.findBetweenDates(fromText, toText);
+            List<ProductSalesRow> sales = orderService.productSalesBetween(fromText, toText);
+            Platform.runLater(() -> showReport(orders, sales));
+        });
+    }
+
+    private void showReport(List<Order> orders, List<ProductSalesRow> sales) {
         reportList.setAll(orders);
 
         double revenue = orders.stream()
@@ -98,7 +112,6 @@ public class ReportController {
         revenueLabel.setText(String.format("%.2f", revenue));
         avgOrderLabel.setText(orders.isEmpty() ? "0.00" : String.format("%.2f", revenue / orders.size()));
 
-        List<ProductSalesRow> sales = orderService.productSalesBetween(from.toString(), to.toString());
         renderTopSellingChart(sales);
         renderTopRevenueChart(sales);
     }

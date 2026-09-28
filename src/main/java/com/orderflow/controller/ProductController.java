@@ -14,7 +14,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 
-public class ProductController {
+public class ProductController extends AbstractCrudController<Product> {
 
     @FXML private TextField nameField;
     @FXML private TextField skuField;
@@ -43,7 +43,6 @@ public class ProductController {
     private final SupplierService supplierService = new SupplierService();
     private final ObservableList<Product> productList = FXCollections.observableArrayList();
 
-    private Product selectedProduct;
 
     @FXML
     public void initialize() {
@@ -82,12 +81,14 @@ public class ProductController {
         refresh();
     }
 
-    private void refresh() {
+    @Override
+    protected void refresh() {
         productList.setAll(productService.findAll());
     }
 
-    private void populateForm(Product p) {
-        selectedProduct = p;
+    @Override
+    protected void populateForm(Product p) {
+        selectedItem = p;
         nameField.setText(p.getName());
         skuField.setText(p.getSku());
         purchasePriceField.setText(String.valueOf(p.getPurchasePrice()));
@@ -125,13 +126,13 @@ public class ProductController {
 
     @FXML
     private void handleUpdate() {
-        if (selectedProduct == null) {
+        if (!hasSelection()) {
             AlertUtil.warn("No selection", "Select a product from the table first.");
             return;
         }
-        Product p = buildProductFromForm(selectedProduct.getId());
+        Product p = buildProductFromForm(selectedItem.getId());
         if (p == null) return;
-        p.setActive(selectedProduct.isActive());
+        p.setActive(selectedItem.isActive());
 
         if (productService.update(p)) {
             AlertUtil.info("Success", "Product updated successfully.");
@@ -144,12 +145,12 @@ public class ProductController {
 
     @FXML
     private void handleDeactivate() {
-        if (selectedProduct == null) {
+        if (!hasSelection()) {
             AlertUtil.warn("No selection", "Select a product from the table first.");
             return;
         }
-        if (AlertUtil.confirm("Confirm", "Deactivate '" + selectedProduct.getName() + "'? It will no longer appear for new orders.")) {
-            productService.deactivate(selectedProduct.getId());
+        if (AlertUtil.confirm("Confirm", "Deactivate '" + selectedItem.getName() + "'? It will no longer appear for new orders.")) {
+            productService.deactivate(selectedItem.getId());
             handleClear();
             refresh();
         }
@@ -157,7 +158,12 @@ public class ProductController {
 
     @FXML
     private void handleClear() {
-        selectedProduct = null;
+        clearForm();
+    }
+
+    @Override
+    protected void clearForm() {
+        selectedItem = null;
         nameField.clear();
         skuField.clear();
         purchasePriceField.clear();

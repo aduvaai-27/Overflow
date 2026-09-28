@@ -1,8 +1,16 @@
 package com.orderflow.controller;
 
+import com.orderflow.model.BaseEntity;
 import com.orderflow.util.AlertUtil;
 
-public abstract class AbstractCrudController<T> {
+/**
+ * Topic: Advanced OOP (abstract class + generics + inheritance).
+ *
+ * Shared behaviour for every CRUD screen (Category, Customer, Product,
+ * Supplier). Each subclass supplies its own refresh / populateForm /
+ * clearForm; the "which row is selected" logic lives here once.
+ */
+public abstract class AbstractCrudController<T extends BaseEntity> {
 
     protected T selectedItem;
 

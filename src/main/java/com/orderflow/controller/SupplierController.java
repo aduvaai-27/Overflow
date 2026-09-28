@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class SupplierController {
+public class SupplierController extends AbstractCrudController<Supplier> {
 
     // ---- Supplier form/table ----
     @FXML private TextField nameField;
@@ -66,7 +66,6 @@ public class SupplierController {
     private final ObservableList<SupplierRequest> requestList = FXCollections.observableArrayList();
     private final List<CheckBox> categoryCheckboxes = new java.util.ArrayList<>();
     private List<Product> allActiveProducts = List.of();
-    private Supplier selectedSupplier;
 
     @FXML
     public void initialize() {
@@ -113,6 +112,11 @@ public class SupplierController {
             }
         });
 
+        refreshAll();
+    }
+
+    @Override
+    protected void refresh() {
         refreshAll();
     }
 
@@ -166,8 +170,9 @@ public class SupplierController {
                 : filtered.size() + " product(s) supplied by " + supplier.getName());
     }
 
-    private void populateForm(Supplier s) {
-        selectedSupplier = s;
+    @Override
+    protected void populateForm(Supplier s) {
+        selectedItem = s;
         nameField.setText(s.getName());
         phoneField.setText(s.getPhone());
         emailField.setText(s.getEmail());
@@ -195,11 +200,11 @@ public class SupplierController {
 
     @FXML
     private void handleUpdateSupplier() {
-        if (selectedSupplier == null) {
+        if (!hasSelection()) {
             AlertUtil.warn("No selection", "Select a supplier from the table first.");
             return;
         }
-        Supplier s = buildFromForm(selectedSupplier.getId());
+        Supplier s = buildFromForm(selectedItem.getId());
         if (s == null) return;
         supplierService.update(s, selectedCategoryIds());
         handleClearSupplierForm();
@@ -208,12 +213,12 @@ public class SupplierController {
 
     @FXML
     private void handleDeleteSupplier() {
-        if (selectedSupplier == null) {
+        if (!hasSelection()) {
             AlertUtil.warn("No selection", "Select a supplier from the table first.");
             return;
         }
-        if (AlertUtil.confirm("Confirm delete", "Delete supplier '" + selectedSupplier.getName() + "'?")) {
-            if (!supplierService.delete(selectedSupplier.getId())) {
+        if (AlertUtil.confirm("Confirm delete", "Delete supplier '" + selectedItem.getName() + "'?")) {
+            if (!supplierService.delete(selectedItem.getId())) {
                 AlertUtil.error("Error", "Could not delete this supplier. They still have products assigned or restock requests on file.");
             }
             handleClearSupplierForm();
@@ -223,7 +228,12 @@ public class SupplierController {
 
     @FXML
     private void handleClearSupplierForm() {
-        selectedSupplier = null;
+        clearForm();
+    }
+
+    @Override
+    protected void clearForm() {
+        selectedItem = null;
         nameField.clear();
         phoneField.clear();
         emailField.clear();

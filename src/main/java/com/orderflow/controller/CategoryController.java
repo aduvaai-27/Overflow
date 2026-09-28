@@ -13,7 +13,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 
-public class CategoryController {
+public class CategoryController extends AbstractCrudController<Category> {
 
     @FXML private TableView<Category> categoryTable;
     @FXML private TableColumn<Category, Integer> idColumn;
@@ -32,7 +32,6 @@ public class CategoryController {
     private final CategoryService categoryService = new CategoryService();
     private final ObservableList<Category> categoryList = FXCollections.observableArrayList();
     private final ObservableList<CatalogRow> catalogList = FXCollections.observableArrayList();
-    private Category selectedCategory;
 
     @FXML
     public void initialize() {
@@ -52,8 +51,7 @@ public class CategoryController {
         categoryTable.setItems(categoryList);
         categoryTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
-                selectedCategory = newVal;
-                nameField.setText(newVal.getName());
+                select(newVal);
             }
             showCatalog(newVal);
         });
@@ -61,9 +59,15 @@ public class CategoryController {
         refresh();
     }
 
-    private void refresh() {
+    @Override
+    protected void refresh() {
         categoryList.setAll(categoryService.findAll());
         showCatalog(null);
+    }
+
+    @Override
+    protected void populateForm(Category category) {
+        nameField.setText(category.getName());
     }
 
     /** Fills the Supplier / Product / Price / Unique ID table for the given category. */
@@ -94,7 +98,7 @@ public class CategoryController {
 
     @FXML
     private void handleUpdate() {
-        if (selectedCategory == null) {
+        if (!hasSelection()) {
             AlertUtil.warn("No selection", "Select a category to update first.");
             return;
         }
@@ -103,19 +107,19 @@ public class CategoryController {
             AlertUtil.warn("Validation", "Please enter a category name.");
             return;
         }
-        categoryService.update(selectedCategory.getId(), name);
+        categoryService.update(selectedItem.getId(), name);
         handleClear();
         refresh();
     }
 
     @FXML
     private void handleDelete() {
-        if (selectedCategory == null) {
+        if (!hasSelection()) {
             AlertUtil.warn("No selection", "Select a category to delete first.");
             return;
         }
-        if (AlertUtil.confirm("Confirm delete", "Delete category '" + selectedCategory.getName() + "'?")) {
-            if (!categoryService.delete(selectedCategory.getId())) {
+        if (AlertUtil.confirm("Confirm delete", "Delete category '" + selectedItem.getName() + "'?")) {
+            if (!categoryService.delete(selectedItem.getId())) {
                 AlertUtil.error("Error", "Could not delete this category. It may still be used by existing products.");
             }
             handleClear();
@@ -125,7 +129,12 @@ public class CategoryController {
 
     @FXML
     private void handleClear() {
-        selectedCategory = null;
+        clearForm();
+    }
+
+    @Override
+    protected void clearForm() {
+        selectedItem = null;
         nameField.clear();
         categoryTable.getSelectionModel().clearSelection();
     }

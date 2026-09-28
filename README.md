@@ -26,6 +26,9 @@ I built OrderFlow as my order & inventory management project for a small online 
 - I used JavaFX for the entire GUI. I have one `.fxml` file per screen in `src/main/resources/com/orderflow/fxml/`, and a matching controller class in `controller/` that handles the events (every `onAction="#method"` in the fxml maps to a method in its controller).
 - I used Java multithreading in `service/StockAlertMonitor.java` — it runs on its own background thread, checks for low-stock products every few seconds, and reports back to the JavaFX UI thread safely using `Platform.runLater()`.
 - I used JavaFX's `Task` API for concurrent task management in `service/ExchangeRateService.java`, so the exchange-rate API call runs in the background and never freezes the UI.
+- I used advanced OOP: `model/BaseEntity.java` is an abstract class that `Category`, `Customer`, `Product` and `Supplier` extend (shared `id`, each implements `getDisplayName()`); `controller/AbstractCrudController<T extends BaseEntity>` is an abstract generic class that the Category, Customer, Product and Supplier controllers extend; `controller/Disposable` and `service/BackgroundService` are interfaces (implemented by `DashboardController` and `StockAlertMonitor`).
+- I used a thread pool in `util/AppExecutor.java` (`Executors.newFixedThreadPool(4)`) for the exchange-rate call and the Reports database queries, and a 2-thread `ScheduledExecutorService` pool in `StockAlertMonitor`. Results go back to the UI with `Platform.runLater`, and `DatabaseConnection.getConnection()` is `synchronized`.
+- I made the layout responsive in `util/ResponsiveUtil.java`: fixed-width side panels and the bar charts have their `prefWidth` / `prefHeight` bound to the window's width / height (`Bindings.min/max` on `widthProperty()` / `heightProperty()`), so they grow with the window and never shrink below the original design. Several screens also use `HBox.hgrow`, `VBox.vgrow` and a `GridPane` with `percentWidth` columns.
 - I used SQLite as my relational database. I used `db/DatabaseConnection.java` to open the connection and run `database/schema.sql` on first launch, and I used one DAO class per table in `dao/` (`ProductDAO`, `OrderDAO`, `CapitalDAO`, etc.) for all my SQL — including multi-step transactions like placing an order.
 - I used JSON parsing and API response handling in `service/ExchangeRateService.java`. I call `open.er-api.com` over HTTPS with `java.net.http.HttpClient`, and I parse the JSON response with the `org.json` library to pull out the USD→BDT rate.
 
@@ -42,9 +45,9 @@ OrderFlow/
 │   ├── model/                     plain data classes — Product, Order, Supplier, CapitalTransaction, etc.
 │   ├── dao/                       one class per table, all my SQL lives here
 │   ├── business/                  service layer I added between controllers and dao
-│   ├── service/                   StockAlertMonitor and ExchangeRateService
+│   ├── service/                   StockAlertMonitor, ExchangeRateService, BackgroundService
 │   ├── controller/                one controller per screen
-│   └── util/                      PasswordUtil, AlertUtil, Session, DateUtil, TableColorUtil, ChartUtil
+│   └── util/                      PasswordUtil, AlertUtil, Session, DateUtil, TableColorUtil, ChartUtil, AppExecutor, ResponsiveUtil
 └── src/main/resources/com/orderflow/
     ├── fxml/                      one layout file per screen
     └── css/style.css              all my styling

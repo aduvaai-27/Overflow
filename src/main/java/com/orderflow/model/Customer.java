@@ -1,8 +1,7 @@
 package com.orderflow.model;
 
 /** Represents a customer who places orders. */
-public class Customer {
-    private int id;
+public class Customer extends BaseEntity {
     private String name;
     private String phone;
     private String email;
@@ -11,15 +10,12 @@ public class Customer {
     public Customer() {}
 
     public Customer(int id, String name, String phone, String email, String address) {
-        this.id = id;
+        setId(id);
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.address = address;
     }
-
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -32,6 +28,9 @@ public class Customer {
 
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
+
+    @Override
+    public String getDisplayName() { return name; }
 
     @Override
     public String toString() { return name + " (" + phone + ")"; }

@@ -1,6 +1,7 @@
 package com.orderflow;
 
 import com.orderflow.db.DatabaseConnection;
+import com.orderflow.util.AppExecutor;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -53,6 +54,7 @@ public class Main extends Application {
 
     @Override
     public void stop() {
+        AppExecutor.shutdown();
         DatabaseConnection.close();
     }
 

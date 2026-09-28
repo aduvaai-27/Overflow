@@ -28,7 +28,7 @@ import javafx.scene.layout.VBox;
 
 import java.util.List;
 
-public class CustomerController {
+public class CustomerController extends AbstractCrudController<Customer> {
 
     @FXML private TextField nameField;
     @FXML private TextField phoneField;
@@ -46,7 +46,6 @@ public class CustomerController {
     private final CustomerService customerService = new CustomerService();
     private final OrderService orderService = new OrderService();
     private final ObservableList<Customer> customerList = FXCollections.observableArrayList();
-    private Customer selectedCustomer;
 
     @FXML
     public void initialize() {
@@ -75,12 +74,14 @@ public class CustomerController {
         refresh();
     }
 
-    private void refresh() {
+    @Override
+    protected void refresh() {
         customerList.setAll(customerService.findAll());
     }
 
-    private void populateForm(Customer c) {
-        selectedCustomer = c;
+    @Override
+    protected void populateForm(Customer c) {
+        selectedItem = c;
         nameField.setText(c.getName());
         phoneField.setText(c.getPhone());
         emailField.setText(c.getEmail());
@@ -101,11 +102,11 @@ public class CustomerController {
 
     @FXML
     private void handleUpdate() {
-        if (selectedCustomer == null) {
+        if (!hasSelection()) {
             AlertUtil.warn("No selection", "Select a customer from the table first.");
             return;
         }
-        Customer c = buildFromForm(selectedCustomer.getId());
+        Customer c = buildFromForm(selectedItem.getId());
         if (c == null) return;
         customerService.update(c);
         handleClear();
@@ -114,12 +115,12 @@ public class CustomerController {
 
     @FXML
     private void handleDelete() {
-        if (selectedCustomer == null) {
+        if (!hasSelection()) {
             AlertUtil.warn("No selection", "Select a customer from the table first.");
             return;
         }
-        if (AlertUtil.confirm("Confirm delete", "Delete customer '" + selectedCustomer.getName() + "'?")) {
-            if (!customerService.delete(selectedCustomer.getId())) {
+        if (AlertUtil.confirm("Confirm delete", "Delete customer '" + selectedItem.getName() + "'?")) {
+            if (!customerService.delete(selectedItem.getId())) {
                 AlertUtil.error("Error", "Could not delete this customer. They may already have existing orders.");
             }
             handleClear();
@@ -129,7 +130,12 @@ public class CustomerController {
 
     @FXML
     private void handleClear() {
-        selectedCustomer = null;
+        clearForm();
+    }
+
+    @Override
+    protected void clearForm() {
+        selectedItem = null;
         nameField.clear();
         phoneField.clear();
         emailField.clear();

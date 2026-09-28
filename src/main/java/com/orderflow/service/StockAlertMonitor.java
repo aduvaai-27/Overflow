@@ -20,7 +20,7 @@ import java.util.function.IntConsumer;
  * so the result is delivered through Platform.runLater(), which schedules
  * the update to run safely on the JavaFX Application Thread.
  */
-public class StockAlertMonitor {
+public class StockAlertMonitor implements BackgroundService {
 
     private final ProductDAO productDAO = new ProductDAO();
     private ScheduledExecutorService executor;
@@ -30,7 +30,7 @@ public class StockAlertMonitor {
      * a new low-stock count is available.
      */
     public void start(IntConsumer onUpdate, int intervalSeconds) {
-        executor = Executors.newSingleThreadScheduledExecutor(runnable -> {
+        executor = Executors.newScheduledThreadPool(2, runnable -> {
             Thread t = new Thread(runnable, "stock-alert-monitor-thread");
             t.setDaemon(true); // dies automatically when the app closes
             return t;
@@ -46,6 +46,7 @@ public class StockAlertMonitor {
         }, 0, intervalSeconds, TimeUnit.SECONDS);
     }
 
+    @Override
     public void stop() {
         if (executor != null) {
             executor.shutdownNow();

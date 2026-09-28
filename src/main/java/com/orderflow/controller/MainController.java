@@ -1,6 +1,7 @@
 package com.orderflow.controller;
 
 import com.orderflow.Main;
+import com.orderflow.util.ResponsiveUtil;
 import com.orderflow.util.Session;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -98,6 +99,7 @@ public class MainController {
             Node view = loader.load();
             currentSubController = loader.getController();
 
+            ResponsiveUtil.apply(view, contentArea); // bind panel/chart sizes to the window size
             contentArea.getChildren().setAll(view);
             pageTitleLabel.setText(title);
             highlightActiveButton(activeButton);
